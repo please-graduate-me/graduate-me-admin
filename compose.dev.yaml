@@ -15,7 +15,6 @@ services:
         - action: sync
           path: .
           target: /app
-          initial_sync: true
           ignore:
             - node_modules/
             - dist/
