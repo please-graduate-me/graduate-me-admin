@@ -8,8 +8,7 @@ export default defineConfig({
   test: {
     name: 'admin',
     environment: 'node',
-    include: ['**/*.test.ts'],
+    include: ['src/**/*.test.{ts,tsx}'],
     exclude: ['**/node_modules/**', '**/dist/**', '**/coverage/**'],
-    passWithNoTests: true,
   },
 });

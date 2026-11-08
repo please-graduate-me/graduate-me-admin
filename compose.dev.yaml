@@ -19,6 +19,7 @@ services:
             - node_modules/
             - dist/
             - coverage/
+            - .tanstack/
             - .git/
             - .env
             - .env.*
@@ -28,9 +29,13 @@ services:
             - Dockerfile*
             - compose*.yaml
             - vite.config.ts
+            - tsr.config.json
         - action: sync+restart
           path: ./vite.config.ts
           target: /app/vite.config.ts
+        - action: sync+restart
+          path: ./tsr.config.json
+          target: /app/tsr.config.json
         - action: rebuild
           path: ./pnpm-lock.yaml
         - action: rebuild

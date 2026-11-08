@@ -9,7 +9,12 @@ import tseslint from 'typescript-eslint';
 
 /** React 검사와 공통 포맷 규칙을 관리자 앱에서 독립 실행한다. */
 export default defineConfig([
-  globalIgnores(['dist/**', 'coverage/**', 'node_modules/**']),
+  globalIgnores([
+    'dist/**',
+    'coverage/**',
+    'node_modules/**',
+    'src/app/routeTree.gen.ts',
+  ]),
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
@@ -22,6 +27,14 @@ export default defineConfig([
         'error',
         { allowConstantExport: true },
       ],
+    },
+  },
+  {
+    files: ['src/app/routes/**/*.{ts,tsx}'],
+    ignores: ['src/app/routes/**/-components/**'],
+    rules: {
+      // 라우트 모듈의 HMR은 TanStack Router의 Vite 플러그인이 처리한다.
+      'react-refresh/only-export-components': 'off',
     },
   },
   prettier,

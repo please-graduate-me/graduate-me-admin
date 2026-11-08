@@ -1,19 +1,10 @@
-@import 'tailwindcss';
+@layer theme, base, antd, components, utilities;
 
-@theme {
-  --color-ink: #24314b;
-  --color-muted: #576985;
-  --color-line: #d5def1;
-  --color-accent: #254fca;
-  --color-canvas: #f5f7fc;
-  --color-surface: #ffffff;
-  --font-sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
-}
+@import 'tailwindcss';
 
 @layer base {
   body {
+    margin: 0;
     min-width: 320px;
-    font-family: var(--font-sans);
-    line-height: 1.6;
   }
 }
