@@ -2,7 +2,9 @@
 
 - 설명, 문서, 주석은 한국어로 작성하고 em dash 문자를 사용하지 않는다.
 - 코드 배치와 의존 방향, 스타일은 [Architecture.md](Architecture.md)를 따른다.
-- 관리자 앱 스타일은 Tailwind CSS로 작성한다. 공통 테마 값은 `app/globals.css`의 `@theme`에서 관리한다.
+- 라우팅은 TanStack Router의 파일 기반 방식, 서버 상태 관리는 TanStack Query를 사용한다. 라우트는 `src/app/routes/`, 화면 부품과 화면 전용 훅은 가장 가까운 소유 라우트의 `-components/`에 둔다.
+- 새 코드와 수정하는 코드의 위치는 `Architecture.md`의 위치 결정 순서로 판단한다. 실제 사용처를 기준으로 배치하고, 사용처가 바뀌면 위치를 다시 판단한다.
+- 관리자 앱 스타일은 Tailwind CSS로 작성한다. 공통 테마 값은 `src/app/globals.css`의 `@theme`에서 관리한다.
 - 사용자 웹, 관리자 웹, 백엔드는 타입·검증·업무 로직을 각 앱에서 관리한다. 공통 소스 패키지나 앱 간 직접 import를 만들지 않는다.
 - API 변경 시 백엔드와 해당 API를 사용하는 앱의 정의·사용처를 함께 확인한다.
 - 로컬 서비스 실행과 환경변수 주입은 Docker Compose가 담당한다. 개발 서버는 `pnpm dev`로 실행하며 `dev:app`은 컨테이너 내부 명령이다.
