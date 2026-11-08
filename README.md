@@ -1,10 +1,10 @@
 # graduate-me-admin
 
-graduate me의 관리자 웹을 관리하는 독립 저장소입니다. React, Vite, TypeScript, Tailwind CSS를 사용하며 기존 NestJS API에 연결합니다.
+graduate me의 관리자 웹을 관리하는 독립 저장소입니다. React, Vite, TypeScript, TanStack Router, TanStack Query, Ant Design을 사용하며 기존 NestJS API에 연결합니다.
 
 ## 현재 제공 범위
 
-초기 진입 화면, 독립 빌드, 개발·운영 Docker 이미지, API 프록시, 정적 검사와 CI를 제공합니다. 기존 사용자 웹의 `/admin` 공유 관리 화면은 아직 이전하지 않았습니다. 로그인·권한 확인과 분석·사용량·오류 신고 화면도 이 저장소에 아직 구현하지 않았습니다.
+파일 기반 라우팅과 대시보드 공통 레이아웃, QueryClient 연결, Ant Design 한국어·테마 설정, 독립 빌드, 개발·운영 Docker 이미지, API 프록시, 정적 검사와 CI를 제공합니다. 기존 사용자 웹의 `/admin` 공유 관리 화면은 아직 이전하지 않았습니다. 로그인·권한 확인과 분석·사용량·오류 신고 화면도 이 저장소에 아직 구현하지 않았습니다.
 
 ## 저장소 배치
 
@@ -46,7 +46,7 @@ pnpm build
 docker compose -f compose.yaml -f compose.dev.yaml config --quiet
 ```
 
-`pnpm check`는 Prettier 적용, ESLint, 타입 검사를 순서대로 실행합니다. `check:ci`는 파일을 수정하지 않습니다. Vitest는 준비되어 있으나 초기 화면에 대한 테스트는 아직 없습니다. 테스트 파일이 없는 초기 단계만 통과하도록 설정했으며 테스트가 추가되면 실패를 정상적으로 보고합니다.
+`pnpm check`는 Prettier 적용, ESLint, 타입 검사를 순서대로 실행합니다. `check:ci`는 포맷을 수정하지 않고 검사하며 라우트 트리는 갱신합니다. Vitest로 기본 경로의 대시보드 레이아웃·화면 연결, QueryClient 전달과 없는 경로 처리를 확인합니다. 타입 검사·테스트 전에 `pnpm routes:generate`로 라우트 트리를 생성하므로 새 체크아웃에서도 바로 실행할 수 있습니다.
 
 `pnpm build`는 정적 파일을 `dist/`에 생성합니다. 운영 구성은 Nginx로 정적 파일과 SPA 경로를 제공하고 `/api/`를 백엔드로 전달합니다. `/healthz`는 웹 컨테이너 상태만 확인하며 백엔드 연결·인증 성공을 보장하지 않습니다.
 
@@ -64,3 +64,13 @@ docker compose down
 관리자 API의 기존 권한 검사는 백엔드에 유지합니다. 브라우저에 비밀 키를 넣지 않습니다.
 
 코드 배치는 [Architecture.md](Architecture.md), 작업 지침은 [AGENTS.md](AGENTS.md)를 따릅니다.
+
+## 앱 코드 배치
+
+- `src/app/routes/`: 파일 기반 라우트와 화면 조립. `-components/`는 해당 라우트와 하위 라우트의 부품·훅을 배치하며 경로 생성에서 제외합니다.
+- `src/app/routes/_dashboard/route.tsx`: 대시보드 공통 레이아웃. `_dashboard`는 URL에 포함되지 않습니다.
+- `src/app/queryClient.ts`, `router.ts`: 서버 상태 캐시와 라우터 연결.
+- `src/app/theme.ts`: Ant Design 공통 테마. 기본 UI는 `antd`에서 직접 가져오며, Tailwind는 화면 배치에 사용합니다.
+- `tsr.config.json`: 개발 플러그인과 생성 명령이 공유하는 라우트 설정. 테스트·스토리 파일도 라우트에서 제외합니다.
+
+`src/app/routeTree.gen.ts`는 생성기가 관리하며 직접 수정하거나 포맷하지 않습니다. `domains/`와 `components/ui/`는 실제 업무 코드와 자체 공통 UI가 필요할 때 생성합니다. 현재 초기 화면은 업무 API를 호출하지 않습니다.
