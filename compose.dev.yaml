@@ -1,0 +1,40 @@
+services:
+  admin:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: pnpm dev:app
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:3001').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /app
+          initial_sync: true
+          ignore:
+            - node_modules/
+            - dist/
+            - coverage/
+            - .git/
+            - .env
+            - .env.*
+            - '*.tsbuildinfo'
+            - package.json
+            - pnpm-lock.yaml
+            - Dockerfile*
+            - compose*.yaml
+            - vite.config.ts
+        - action: sync+restart
+          path: ./vite.config.ts
+          target: /app/vite.config.ts
+        - action: rebuild
+          path: ./pnpm-lock.yaml
+        - action: rebuild
+          path: ./package.json
+        - action: rebuild
+          path: ./Dockerfile.dev

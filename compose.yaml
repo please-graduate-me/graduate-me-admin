@@ -1,0 +1,21 @@
+name: graduate-me-admin
+services:
+  admin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      API_INTERNAL_URL: '${API_INTERNAL_URL:-http://api:4000}'
+    ports:
+      - '127.0.0.1:3001:3001'
+    healthcheck:
+      test: [CMD, wget, -q, --spider, 'http://127.0.0.1:3001/healthz']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - app
+networks:
+  app:
+    name: '${APP_NETWORK_NAME:-graduate-me-app}'
+    external: true
