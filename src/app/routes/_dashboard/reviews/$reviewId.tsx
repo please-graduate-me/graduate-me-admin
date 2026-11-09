@@ -16,6 +16,7 @@ import { SourceExcerpt } from '@/domains/questions/ui/SourceExcerpt';
 import { PageHeading } from '../-components/PageHeading';
 import { QueryError } from '../-components/QueryError';
 import { ReviewDecision } from './-components/ReviewDecision';
+import { QuestionContentPanel } from '../questions/-components/QuestionContentPanel';
 
 /** 선택한 검토 요청의 공유 근거와 운영 조치를 연결한다. */
 export const Route = createFileRoute('/_dashboard/reviews/$reviewId')({
@@ -26,6 +27,7 @@ export const Route = createFileRoute('/_dashboard/reviews/$reviewId')({
 });
 
 function ReviewDetail() {
+  const { access } = Route.useRouteContext();
   const navigate = Route.useNavigate();
   const { reviewId } = Route.useParams();
   const query = useQuery(reviewsQuery);
@@ -117,9 +119,13 @@ function ReviewDetail() {
           review={review}
         />
       </div>
+      <QuestionContentPanel
+        questionId={review.questionId}
+        access={access}
+      />
       <Alert
         type='warning'
-        title='조치 사유와 처리 상태를 기록합니다. 원문·AI 설명·생성 문제의 실제 수정이나 노출 중단으로 처리하지 않습니다.'
+        title='요청 처리 상태와 콘텐츠 버전 검토는 구분합니다. 위의 공유 결과에서 수정·노출 조치를 적용하고, 확인한 사유를 요청 처리 기록에 남겨 주세요.'
       />
     </section>
   );

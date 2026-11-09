@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { targetSchema } from '@/domains/content/model/target';
 
 const personSchema = z.object({ id: z.string(), name: z.string().nullable() });
 
@@ -16,6 +17,17 @@ export const sourceSchema = z.discriminatedUnion('kind', [
     quote: z.string(),
     title: z.string(),
     language: z.enum(['en', 'th']),
+    version: z.number().default(1),
+    rects: z
+      .array(
+        z.object({
+          x: z.number(),
+          y: z.number(),
+          width: z.number(),
+          height: z.number(),
+        })
+      )
+      .optional(),
   }),
   z.object({
     kind: z.literal('video'),
@@ -25,6 +37,7 @@ export const sourceSchema = z.discriminatedUnion('kind', [
     quote: z.string(),
     title: z.string(),
     language: z.enum(['en', 'th']),
+    version: z.number().default(1),
     start: z.number().optional(),
     end: z.number().optional(),
   }),
@@ -41,6 +54,19 @@ export const questionSchema = z.object({
   updatedAt: z.string(),
   assignee: personSchema.nullable(),
   author: personSchema,
+  kind: z.enum(['question', 'report']).default('question'),
+  resolvedAt: z.string().nullable().default(null),
+  revokedAt: z.string().nullable().default(null),
+  attachment: z
+    .object({
+      artifactId: z.string().optional(),
+      version: z.number().optional(),
+      kind: z.enum(['explanation', 'practice', 'ai_answer']),
+      text: z.string(),
+      payload: z.record(z.string(), z.unknown()).optional(),
+    })
+    .nullable()
+    .default(null),
 });
 
 /** 검토 요청은 대상과 버전, 운영 조치 사유를 함께 보존한다. */
@@ -56,6 +82,8 @@ export const reviewSchema = z.object({
   updatedAt: z.string(),
   author: historicalPersonSchema,
   source: sourceSchema,
+  target: targetSchema.nullable().default(null),
+  kind: z.enum(['report', 'review_request']).default('review_request'),
 });
 
 /** 도우미 상세 응답의 비공개 필드를 학생용 계약과 분리한다. */

@@ -12,6 +12,7 @@ export const accessSchema = z.object({
   materialIds: z.array(z.string()),
   canReview: z.boolean(),
   canRequestEdit: z.boolean(),
+  canEdit: z.boolean().default(false),
 });
 
 /** 화면의 역할 표시와 접근 분기에 같은 검증된 계약을 사용한다. */

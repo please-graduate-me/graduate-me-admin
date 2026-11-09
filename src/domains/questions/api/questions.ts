@@ -5,6 +5,7 @@ import {
 } from '@tanstack/react-query';
 import { z } from 'zod';
 import { jsonBody, request } from '@/lib/api/request';
+import type { ContentTarget } from '@/domains/content/model/target';
 import {
   eventSchema,
   questionDetailSchema,
@@ -79,6 +80,7 @@ export function useQuestionMutation(id: string) {
             scope: 'source' | 'explanation' | 'question';
             version: string;
             reason: string;
+            target?: ContentTarget;
           }
     ) => {
       const { action, ...body } = input;

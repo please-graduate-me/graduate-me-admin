@@ -24,12 +24,15 @@ import type { QuestionDetail } from '@/domains/questions/model/contracts';
 import { QuestionStatus } from '@/domains/questions/ui/QuestionStatus';
 import { SourceExcerpt } from '@/domains/questions/ui/SourceExcerpt';
 import { PageHeading } from '../../-components/PageHeading';
+import { contentQuery } from '@/domains/content/api/content';
+import { QuestionContentPanel } from './QuestionContentPanel';
 
 type EditorValues = { draft: string; internalNote: string };
 type ReviewValues = {
   scope: 'source' | 'explanation' | 'question';
   version: string;
   reason: string;
+  targetKey?: string;
 };
 
 /** 공개 답변과 내부 메모를 분리해 저장하고 근거·검토 범위를 함께 표시한다. */
@@ -48,6 +51,8 @@ export function QuestionEditor({
   const { message } = App.useApp();
   const { token } = theme.useToken();
   const mutation = useQuestionMutation(question.id);
+  const content = useQuery(contentQuery(question.id));
+  const selectedTargetKey = Form.useWatch('targetKey', reviewForm);
 
   const helpers = useQuery({
     ...helpersQuery,
@@ -116,7 +121,26 @@ export function QuestionEditor({
     try {
       const values = await reviewForm.validateFields();
 
-      await mutation.mutateAsync({ action: 'reviews', ...values });
+      const target = content.data?.items.find(
+        (item) => `${item.kind}:${item.id}` === values.targetKey
+      );
+
+      await mutation.mutateAsync({
+        action: 'reviews',
+        scope: values.scope,
+        version: values.version,
+        reason: values.reason,
+        ...(target
+          ? {
+              target: {
+                kind: target.kind,
+                id: target.id,
+                version: target.version,
+              },
+            }
+          : {}),
+      });
+
       message.success('검토 요청을 기록했습니다.');
       setReviewOpen(false);
       reviewForm.resetFields();
@@ -139,6 +163,8 @@ export function QuestionEditor({
         }
       />
       <Space size={12}>
+        {question.kind === 'report' && <Tag color='red'>학생 오류 신고</Tag>}
+        {question.resolvedAt && <Tag color='green'>학생이 해결 확인</Tag>}
         <Tag bordered={false}>#{question.id.slice(0, 8)}</Tag>
         <QuestionStatus status={question.status} />
         <Typography.Text type='secondary'>
@@ -336,13 +362,40 @@ export function QuestionEditor({
               <Typography.Text
                 type='secondary'
                 style={{ fontSize: 12 }}>
-                자료 전체가 아닌 지정한 구절·대상·버전에 적용됩니다. AI
-                설명·생성 문제는 현재 제공되지 않습니다.
+                자료 전체가 아닌 지정한 구절·대상·버전에 적용됩니다. 공유된
+                결과에서 실제 내용을 검토하고 새 버전을 적용할 수 있습니다.
               </Typography.Text>
             </Space>
           </Card>
         </div>
       </div>
+      {question.attachment && (
+        <Card title='학생이 공유한 결과'>
+          <Space
+            orientation='vertical'
+            className='w-full'>
+            <Tag>
+              {question.attachment.kind === 'explanation'
+                ? '문맥 설명'
+                : question.attachment.kind === 'practice'
+                  ? '연습 문제'
+                  : '선택한 AI 답변'}
+              {question.attachment.version
+                ? ` · v${question.attachment.version}`
+                : ''}
+            </Tag>
+            <Typography.Paragraph
+              className='mb-0!'
+              style={{ whiteSpace: 'pre-wrap' }}>
+              {question.attachment.text}
+            </Typography.Paragraph>
+          </Space>
+        </Card>
+      )}
+      <QuestionContentPanel
+        questionId={question.id}
+        access={access}
+      />
       <Card title='공개 대화 이력'>
         <Timeline
           items={question.messages.map((entry) => ({
@@ -384,12 +437,46 @@ export function QuestionEditor({
         <Form
           form={reviewForm}
           layout='vertical'
-          initialValues={{ scope: 'source', version: '' }}>
+          initialValues={{
+            scope: 'source',
+            version: `v${question.source.version}`,
+          }}>
+          <Form.Item
+            name='targetKey'
+            label='공유된 결과 선택'
+            extra='결과를 선택하면 실제 대상과 현재 버전을 요청에 연결합니다.'>
+            <Select
+              allowClear
+              loading={content.isPending}
+              placeholder='선택한 원문 범위'
+              options={(content.data?.items ?? []).map((item) => ({
+                value: `${item.kind}:${item.id}`,
+                label: `${item.kind === 'explanation' ? '설명' : item.kind === 'practice' ? '문제' : '전사'} · v${item.version}`,
+              }))}
+              onChange={(value) => {
+                const selected = content.data?.items.find(
+                  (item) => `${item.kind}:${item.id}` === value
+                );
+
+                if (selected)
+                  reviewForm.setFieldsValue({
+                    scope:
+                      selected.kind === 'segment'
+                        ? 'source'
+                        : selected.kind === 'practice'
+                          ? 'question'
+                          : 'explanation',
+                    version: `v${selected.version}`,
+                  });
+              }}
+            />
+          </Form.Item>
           <Form.Item
             name='scope'
             label='검토 대상'
             rules={[{ required: true }]}>
             <Select
+              disabled={Boolean(selectedTargetKey)}
               options={[
                 { value: 'source', label: '선택한 원문' },
                 { value: 'explanation', label: '설명' },
@@ -409,6 +496,7 @@ export function QuestionEditor({
               { max: 100 },
             ]}>
             <Input
+              disabled={Boolean(selectedTargetKey)}
               placeholder='예: 원문 p.3 / 설명 v1'
               maxLength={100}
             />

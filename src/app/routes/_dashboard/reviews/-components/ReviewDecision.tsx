@@ -1,8 +1,17 @@
-import { App, Button, Card, Form, Input, Select, Typography } from 'antd';
+import {
+  Alert,
+  App,
+  Button,
+  Card,
+  Form,
+  Input,
+  Select,
+  Typography,
+} from 'antd';
 import { useResolveReview } from '@/domains/questions/api/questions';
 import type { ReviewRequest } from '@/domains/questions/model/contracts';
 
-/** 확인한 근거에 대한 운영 상태와 사유만 저장한다. */
+/** 학생 신고와 도우미 요청의 처리 상태를 실제 콘텐츠 조치와 구분해 저장한다. */
 export function ReviewDecision({ review }: { review: ReviewRequest }) {
   const [form] = Form.useForm<{
     status: 'resolved' | 'dismissed';
@@ -26,6 +35,7 @@ export function ReviewDecision({ review }: { review: ReviewRequest }) {
   return (
     <Card title='운영 조치 기록'>
       <Form
+        disabled={review.status !== 'open' || mutation.isPending}
         form={form}
         layout='vertical'
         initialValues={{
@@ -62,11 +72,20 @@ export function ReviewDecision({ review }: { review: ReviewRequest }) {
         <Typography.Paragraph type='secondary'>
           검토 조치 기록은 admin 내부 이력에 남습니다.
         </Typography.Paragraph>
+        {review.status !== 'open' && (
+          <Alert
+            className='mb-4!'
+            type='success'
+            title='이미 처리된 요청입니다.'
+            description={review.resolution || undefined}
+          />
+        )}
         <Button
           type='primary'
           loading={mutation.isPending}
+          disabled={review.status !== 'open'}
           onClick={submit}>
-          {review.status === 'open' ? '조치 기록 저장' : '조치 기록 갱신'}
+          {review.status === 'open' ? '조치 기록 저장' : '처리 완료'}
         </Button>
       </Form>
     </Card>
