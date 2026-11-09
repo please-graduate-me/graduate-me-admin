@@ -1,9 +1,19 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, redirect } from '@tanstack/react-router';
-import { Alert, Button, Card, Empty, Table, Tag, Typography } from 'antd';
+import {
+  Alert,
+  Button,
+  Card,
+  Empty,
+  Space,
+  Table,
+  Tag,
+  Typography,
+} from 'antd';
 import { MaterialRegistration } from './materials/-components/MaterialRegistration';
 import { MaterialAccessEditor } from './materials/-components/MaterialAccessEditor';
+import { MaterialOcrPanel } from './materials/-components/MaterialOcrPanel';
 import type { AdminMaterial } from '@/domains/operations/model/contracts';
 import { materialsQuery } from '@/domains/operations/api/operations';
 import { formatDate, formatTime } from '@/domains/questions/lib/format';
@@ -32,6 +42,7 @@ function Materials() {
   const query = useQuery(materialsQuery);
   const [registrationOpen, setRegistrationOpen] = useState(false);
   const [editing, setEditing] = useState<AdminMaterial | null>(null);
+  const [recognizing, setRecognizing] = useState<AdminMaterial | null>(null);
   const { access } = Route.useRouteContext();
 
   const change = (patch: Partial<ListSearch>) =>
@@ -102,7 +113,14 @@ function Materials() {
             title: '관리',
             key: 'access',
             render: (_, item) => (
-              <Button onClick={() => setEditing(item)}>접근 범위</Button>
+              <Space>
+                <Button onClick={() => setEditing(item)}>접근 범위</Button>
+                {item.kind === 'pdf' && item.owner?.id === access.user.id && (
+                  <Button onClick={() => setRecognizing(item)}>
+                    글자 인식
+                  </Button>
+                )}
+              </Space>
             ),
           },
           { title: '자료', dataIndex: 'title', width: '36%' },
@@ -166,6 +184,13 @@ function Materials() {
           material={editing}
           userId={access.user.id}
           onClose={() => setEditing(null)}
+        />
+      )}
+      {recognizing && (
+        <MaterialOcrPanel
+          key={recognizing.id}
+          material={recognizing}
+          onClose={() => setRecognizing(null)}
         />
       )}
     </section>

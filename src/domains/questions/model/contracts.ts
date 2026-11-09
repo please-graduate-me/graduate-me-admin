@@ -18,6 +18,7 @@ export const sourceSchema = z.discriminatedUnion('kind', [
     title: z.string(),
     language: z.enum(['en', 'th']),
     version: z.number().default(1),
+    ocrId: z.uuid().optional(),
     rects: z
       .array(
         z.object({

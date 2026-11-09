@@ -37,6 +37,7 @@ const taskLabels: Record<string, string> = {
   video_blanks: '빈칸 후보',
   prepare: '자료 기본 설명',
   preparation: '자료 준비',
+  pdf_ocr: 'PDF 글자 인식 · CLOVA OCR',
 };
 
 const cost = (value: number | null) =>
@@ -148,9 +149,10 @@ export function AIUsageLedger({
           <Typography.Paragraph
             type='secondary'
             className='mt-3! mb-0!'>
-            토큰 합계는 공급자가 반환한 값의 합계입니다. 단가가 없거나 토큰을
-            반환하지 않은 실행의 비용은 임의로 채우지 않습니다. 한도에 도달해도
-            저장된 설명·대화·문제 조회는 이용할 수 있습니다.
+            토큰 합계는 공급자가 반환한 값의 합계입니다. CLOVA OCR은 페이지
+            단가로 추정하고 토큰은 미제공으로 표시합니다. 단가가 없는 실행의
+            비용은 미집계입니다. 한도에 도달해도 저장된 설명·대화·문제 조회는
+            이용할 수 있습니다.
           </Typography.Paragraph>
         </Card>
       )}
@@ -208,7 +210,11 @@ export function AIUsageLedger({
             render: (_, item) => (
               <>
                 <Tag color={item.provider === 'naver' ? 'green' : 'blue'}>
-                  {item.provider === 'naver' ? '네이버' : 'Gemini'}
+                  {item.task === 'pdf_ocr'
+                    ? 'CLOVA OCR'
+                    : item.provider === 'naver'
+                      ? '네이버'
+                      : 'Gemini'}
                 </Tag>
                 {taskLabels[item.task] || item.task}
                 <Typography.Paragraph

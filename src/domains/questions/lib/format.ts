@@ -2,7 +2,7 @@ import type { Source } from '../model/contracts';
 
 /** 원문 위치를 자료의 종류에 맞게 간결하게 표시한다. */
 export function sourceLabel(source: Source) {
-  return `${source.title} · ${source.kind === 'pdf' ? `p.${source.page}` : formatTime(source.start ?? 0)}`;
+  return `${source.title} · ${source.kind === 'pdf' ? `p.${source.page}${source.ocrId ? ' · OCR 원문' : ''}` : formatTime(source.start ?? 0)}`;
 }
 
 /** 영상 원문 위치의 초를 분과 초로 표시한다. */
