@@ -3,10 +3,13 @@ import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 /** 운영자가 등록한 PDF의 실제 페이지 텍스트를 브라우저에서 추출한다. */
 export async function extractMaterialPdf(
   file: File,
+  limits: { maxBytes: number; maxPages: number },
   onProgress: (page: number, total: number) => void
 ) {
-  if (file.size > 10 * 1024 * 1024)
-    throw new Error('PDF는 10MB 이하로 등록해 주세요.');
+  if (file.size > limits.maxBytes)
+    throw new Error(
+      `PDF는 ${limits.maxBytes / 1024 / 1024}MB 이하로 등록해 주세요.`
+    );
   const engine = await import('pdfjs-dist');
 
   engine.GlobalWorkerOptions.workerSrc = workerUrl;
@@ -19,8 +22,8 @@ export async function extractMaterialPdf(
   const document = await task.promise;
 
   try {
-    if (document.numPages > 200)
-      throw new Error('PDF는 200페이지 이하로 등록해 주세요.');
+    if (document.numPages > limits.maxPages)
+      throw new Error(`PDF는 ${limits.maxPages}페이지 이하로 등록해 주세요.`);
     const pages: string[] = [];
     let totalCharacters = 0;
 

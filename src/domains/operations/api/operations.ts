@@ -22,19 +22,29 @@ export async function registerAdminMaterial(
   input:
     | {
         kind: 'pdf';
+        learningPurposeConfirmed: true;
         title: string;
         language: 'en' | 'th';
         filename: string;
         contentBase64: string;
         pages: string[];
       }
-    | { kind: 'video'; url: string; language: 'en' | 'th' }
+    | {
+        kind: 'video';
+        url: string;
+        language: 'en' | 'th';
+        learningPurposeConfirmed: true;
+      }
 ) {
   if (input.kind === 'video') {
     const result = await request(
       '/api/videos',
       z.object({ videoId: z.string() }),
-      jsonBody({ url: input.url, language: input.language })
+      jsonBody({
+        url: input.url,
+        language: input.language,
+        learningPurposeConfirmed: input.learningPurposeConfirmed,
+      })
     );
 
     return { kind: input.kind, id: result.videoId };

@@ -170,6 +170,13 @@ export function MaterialOcrPanel({
                 페이지
               </Typography.Text>
             </Space>
+            {item.eligibility && !item.eligibility.aiAllowed && (
+              <Alert
+                type='warning'
+                title='새 AI 요청 안내'
+                description={item.eligibility.reason}
+              />
+            )}
             {unknownConfidenceCount > 0 && (
               <Alert
                 type='warning'

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { learningEligibilitySchema } from './policy';
 
 const unit = z.number().min(0).max(1);
 
@@ -20,6 +21,7 @@ export const materialOcrSchema = z.object({
   item: z
     .object({
       id: z.uuid(),
+      eligibility: learningEligibilitySchema.optional(),
       provider: z.enum(['naver', 'anthropic']).default('naver'),
       model: z.string().default('모델 기록 없음'),
       materialId: z.string(),

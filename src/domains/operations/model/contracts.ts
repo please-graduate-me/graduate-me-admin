@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { learningEligibilitySchema } from './policy';
 
 /** 운영 통계는 서버의 실제 처리·질문·검토 집계만 표시한다. */
 export const overviewSchema = z.object({
@@ -10,6 +11,7 @@ export const overviewSchema = z.object({
 
 /** 자료 목록 계약에는 PDF 원본과 개인 메모를 포함하지 않는다. */
 export const materialSchema = z.object({
+  eligibility: learningEligibilitySchema.optional(),
   id: z.string(),
   title: z.string(),
   kind: z.enum(['pdf', 'video']),
