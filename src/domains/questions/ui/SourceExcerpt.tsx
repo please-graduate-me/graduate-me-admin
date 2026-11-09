@@ -13,7 +13,7 @@ export function SourceExcerpt({ source }: { source: Source }) {
       className='w-full'>
       <Space>
         <img
-          src='/icons/source-file-text.svg'
+          src={`${import.meta.env.BASE_URL}icons/source-file-text.svg`}
           alt=''
           width={20}
           height={20}

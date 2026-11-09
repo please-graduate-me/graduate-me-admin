@@ -5,6 +5,7 @@ import { routeTree } from './routeTree.gen';
 /** 생성된 경로와 앱의 QueryClient를 같은 라우터에 연결한다. */
 export const router = createRouter({
   routeTree,
+  basepath: import.meta.env.BASE_URL,
   context: { queryClient },
   scrollRestoration: true,
   defaultPreload: 'intent',

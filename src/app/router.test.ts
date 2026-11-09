@@ -12,9 +12,10 @@ import { router } from './router';
 let role: 'admin' | 'helper' | null = 'admin';
 let authenticated = true;
 
-function createTestRouter(path: string) {
+function createTestRouter(path: string, basepath = '/') {
   const testRouter = createRouter({
     ...router.options,
+    basepath,
     history: createMemoryHistory({ initialEntries: [path] }),
     isServer: true,
   });
@@ -92,6 +93,28 @@ describe('관리자 라우팅', () => {
     expect(
       testRouter.state.matches.every((match) => match.status === 'success')
     ).toBe(true);
+  });
+
+  it('하위 경로에서도 질문 주소와 검색 조건을 유지한다', async () => {
+    const testRouter = createTestRouter(
+      '/admin/questions?q=문맥&page=2',
+      '/admin/'
+    );
+
+    await testRouter.load();
+
+    expect(testRouter.state.matches.at(-1)?.routeId).toBe(
+      '/_dashboard/questions/'
+    );
+
+    expect(testRouter.state.matches.at(-1)?.search).toMatchObject({
+      q: '문맥',
+      page: 2,
+    });
+
+    expect(testRouter.buildLocation({ to: '/login' }).href).toBe(
+      '/admin/login'
+    );
   });
 
   it('미로그인 사용자는 운영 데이터를 조회하기 전에 로그인으로 보낸다', async () => {

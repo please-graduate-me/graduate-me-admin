@@ -32,7 +32,7 @@ export function DashboardLayout() {
           </Typography.Text>
           <Space size={16}>
             <img
-              src='/icons/bell.svg'
+              src={`${import.meta.env.BASE_URL}icons/bell.svg`}
               alt=''
               width={20}
               height={20}

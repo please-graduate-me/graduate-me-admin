@@ -4,6 +4,8 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 COPY . .
+ARG ADMIN_BASE_PATH=/
+ENV ADMIN_BASE_PATH=${ADMIN_BASE_PATH}
 RUN pnpm build
 
 FROM nginx:stable-alpine AS runtime

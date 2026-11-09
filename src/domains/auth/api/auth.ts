@@ -30,8 +30,8 @@ export async function authenticate(action: 'signin/google' | 'signout') {
   );
 
   const callbackUrl = new URL(
-    action === 'signout' ? '/login' : '/',
-    window.location.origin
+    action === 'signout' ? 'login' : '',
+    new URL(import.meta.env.BASE_URL, window.location.origin)
   ).href;
 
   const { url } = await request(

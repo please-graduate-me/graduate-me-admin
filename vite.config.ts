@@ -6,6 +6,7 @@ import { defineConfig } from 'vite';
 
 /** API 주소를 브라우저에 노출하지 않고 같은 출처로 요청하게 한다. */
 export default defineConfig({
+  base: process.env.ADMIN_BASE_PATH || '/',
   plugins: [
     tanstackRouter({ autoCodeSplitting: true }),
     react(),
