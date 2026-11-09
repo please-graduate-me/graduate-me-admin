@@ -54,7 +54,10 @@ export function ContentEditor({
   const versions = useQuery(versionsQuery(questionId, content));
   const impact = useQuery(contentImpactQuery(questionId, content));
   const { message } = App.useApp();
-  const editable = access.role === 'admin' || access.canEdit;
+
+  const editable =
+    access.role === 'admin' || (access.canEdit && access.canReview);
+
   const [payloadDirty, setPayloadDirty] = useState(false);
 
   async function apply(

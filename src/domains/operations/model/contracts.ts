@@ -51,6 +51,7 @@ export const usageSchema = z.object({
 /** 원본 접근 권한은 자료 소유자와 공개 정책을 서버에서 검사한 결과를 사용한다. */
 export const materialAccessSchema = z.object({
   id: z.string(),
+  ownerId: z.string().nullable(),
   kind: z.enum(['pdf', 'video']),
   visibility: z.enum(['private', 'public', 'accounts']),
   allowedUserIds: z.array(z.string()),

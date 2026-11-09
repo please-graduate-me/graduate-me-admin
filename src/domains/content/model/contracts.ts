@@ -41,8 +41,8 @@ const common = {
   source: sourceSchema,
   model: z.string(),
   provider: z.enum(['naver', 'source']),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  createdAt: z.string().nullable(),
+  updatedAt: z.string().nullable(),
 };
 
 /** 명시적으로 공유된 질문에 연결된 원문·설명·문제만 관리 화면에 제공한다. */
@@ -74,7 +74,7 @@ export const revisionSchema = z.object({
   ]),
   reason: z.string(),
   actor: z.object({ id: z.string().nullable(), name: z.string() }),
-  createdAt: z.string(),
+  createdAt: z.string().nullable(),
   reviewStatus: z.enum(['unreviewed', 'verified', 'needs_review']),
   status: z.enum(['ready', 'suspended']),
 });

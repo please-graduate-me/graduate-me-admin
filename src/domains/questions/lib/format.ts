@@ -11,7 +11,9 @@ export function formatTime(seconds: number) {
 }
 
 /** 이력 시각은 사용자의 현재 시간대에서 읽을 수 있게 표시한다. */
-export function formatDate(value: string) {
+export function formatDate(value: string | null) {
+  if (!value) return '기록 없음';
+
   return new Intl.DateTimeFormat('ko-KR', {
     month: '2-digit',
     day: '2-digit',

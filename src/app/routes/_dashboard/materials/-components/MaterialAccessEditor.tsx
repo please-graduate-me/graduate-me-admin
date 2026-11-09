@@ -40,9 +40,7 @@ export function MaterialAccessEditor({
   const { message } = App.useApp();
 
   const canPublish =
-    material.kind === 'video' ||
-    material.owner?.id === userId ||
-    query.data?.visibility === 'public';
+    query.data?.ownerId === userId || query.data?.visibility === 'public';
 
   const visibility = Form.useWatch('visibility', form);
 
@@ -111,7 +109,7 @@ export function MaterialAccessEditor({
             <Alert
               className='mb-4!'
               type='warning'
-              title='타인의 비공개 PDF를 운영 권한으로 공개 전환할 수 없습니다.'
+              title='타인의 비공개 자료를 운영 권한으로 공개 전환할 수 없습니다.'
               description='소유자가 공개 범위를 정하거나 운영자가 이용 권한을 확보한 원본을 직접 등록해야 합니다.'
             />
           )}
