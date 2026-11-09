@@ -169,7 +169,7 @@ function Materials() {
       />
       <Alert
         type='warning'
-        title='분석 실패 자료에는 자동·수동 재시도를 제공하지 않습니다. 저장된 정상 결과와 개인 기록은 계속 이용할 수 있습니다.'
+        title='영상 분석 실패 자료에는 자동·수동 재시도를 제공하지 않습니다. 저장된 정상 결과와 개인 기록은 계속 이용할 수 있습니다.'
       />
       <Card title='자료의 공개 범위와 도우미 배정은 별개입니다'>
         <Typography.Paragraph className='mb-0!'>
