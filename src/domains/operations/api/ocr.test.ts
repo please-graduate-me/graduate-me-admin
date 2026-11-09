@@ -8,11 +8,15 @@ it('저장 OCR 조회와 명시적 생성을 구분하고 원본 버전·영역 
   const requestId = '3b0797c0-0c64-4aa9-b152-19874d2fa379';
 
   const result = {
+    provider: 'anthropic',
+    model: 'claude-test-model',
     configured: true,
-    supportedLanguages: ['en'],
+    supportedLanguages: ['en', 'th'],
     languageSupported: true,
     item: {
       id: requestId,
+      provider: 'anthropic',
+      model: 'claude-test-model',
       materialId: 'material',
       version: 2,
       page: 3,
@@ -22,13 +26,13 @@ it('저장 OCR 조회와 명시적 생성을 구분하고 원본 버전·영역 
         {
           text: 'Hello',
           rect: { x: 0.1, y: 0.2, width: 0.3, height: 0.1 },
-          confidence: 0.75,
+          confidence: null,
           lineBreak: true,
         },
       ],
       width: 600,
       height: 800,
-      lowConfidenceCount: 1,
+      lowConfidenceCount: 0,
       error: null,
       createdAt: '2026-11-09T00:00:00.000Z',
       updatedAt: '2026-11-09T00:00:00.000Z',

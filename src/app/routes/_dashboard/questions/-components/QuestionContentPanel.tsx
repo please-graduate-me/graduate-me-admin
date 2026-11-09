@@ -1,3 +1,4 @@
+import { aiProviderLabel } from '@/domains/operations/lib/providerLabel';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Alert, Button, Card, Empty, Space, Spin, Tag, Typography } from 'antd';
@@ -58,19 +59,24 @@ export function QuestionContentPanel({
                 <Typography.Text strong>v{content.version}</Typography.Text>
                 <Tag
                   color={
-                    content.reviewStatus === 'verified' ? 'green' : 'orange'
+                    !content.needsReview && content.reviewStatus === 'verified'
+                      ? 'green'
+                      : 'orange'
                   }>
-                  {content.reviewStatus === 'verified'
-                    ? '이 버전 검토 완료'
-                    : content.needsReview ||
-                        content.reviewStatus === 'needs_review'
-                      ? '재확인 필요'
+                  {content.needsReview ||
+                  content.reviewStatus === 'needs_review'
+                    ? '재확인 필요'
+                    : content.reviewStatus === 'verified'
+                      ? '이 버전 검토 완료'
                       : '미검토'}
                 </Tag>
                 {content.status === 'suspended' && (
                   <Tag color='red'>새 풀이 중단</Tag>
                 )}
               </Space>
+              <Typography.Text type='secondary'>
+                {aiProviderLabel(content.provider)} · {content.model}
+              </Typography.Text>
               <Typography.Paragraph
                 className='mb-0!'
                 style={{ whiteSpace: 'pre-wrap' }}>

@@ -10,6 +10,7 @@ import {
   Tag,
   Typography,
 } from 'antd';
+import { aiProviderLabel } from '@/domains/operations/lib/providerLabel';
 import { aiUsageQuery } from '@/domains/operations/api/operations';
 import { formatDate } from '@/domains/questions/lib/format';
 import { ListFilters } from '../../-components/ListFilters';
@@ -37,7 +38,7 @@ const taskLabels: Record<string, string> = {
   video_blanks: '빈칸 후보',
   prepare: '자료 기본 설명',
   preparation: '자료 준비',
-  pdf_ocr: 'PDF 글자 인식 · CLOVA OCR',
+  pdf_ocr: 'PDF 글자 인식',
 };
 
 const cost = (value: number | null) =>
@@ -149,10 +150,10 @@ export function AIUsageLedger({
           <Typography.Paragraph
             type='secondary'
             className='mt-3! mb-0!'>
-            토큰 합계는 공급자가 반환한 값의 합계입니다. CLOVA OCR은 페이지
-            단가로 추정하고 토큰은 미제공으로 표시합니다. 단가가 없는 실행의
-            비용은 미집계입니다. 한도에 도달해도 저장된 설명·대화·문제 조회는
-            이용할 수 있습니다.
+            토큰 합계는 공급자가 반환한 값의 합계입니다. 공급자가 토큰을
+            제공하지 않는 실행은 미제공으로 표시합니다. 비용은 해당 공급자와
+            모델에 설정된 단가로 추정하며 단가가 없는 실행은 미집계입니다.
+            한도에 도달해도 저장된 설명·대화·문제 조회는 이용할 수 있습니다.
           </Typography.Paragraph>
         </Card>
       )}
@@ -161,8 +162,10 @@ export function AIUsageLedger({
         onChange={(value) => onProvider(String(value))}
         options={[
           { value: 'all', label: '전체 공급자' },
-          { value: 'naver', label: '네이버 AI' },
-          { value: 'gemini', label: 'Gemini' },
+          ...['naver', 'anthropic', 'gemini'].map((value) => ({
+            value,
+            label: aiProviderLabel(value),
+          })),
         ]}
       />
       <ListFilters
@@ -209,12 +212,15 @@ export function AIUsageLedger({
             key: 'task',
             render: (_, item) => (
               <>
-                <Tag color={item.provider === 'naver' ? 'green' : 'blue'}>
-                  {item.task === 'pdf_ocr'
-                    ? 'CLOVA OCR'
-                    : item.provider === 'naver'
-                      ? '네이버'
-                      : 'Gemini'}
+                <Tag
+                  color={
+                    item.provider === 'naver'
+                      ? 'green'
+                      : item.provider === 'anthropic'
+                        ? 'purple'
+                        : 'blue'
+                  }>
+                  {aiProviderLabel(item.provider)}
                 </Tag>
                 {taskLabels[item.task] || item.task}
                 <Typography.Paragraph

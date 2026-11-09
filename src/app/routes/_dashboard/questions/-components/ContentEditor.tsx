@@ -1,3 +1,4 @@
+import { aiProviderLabel } from '@/domains/operations/lib/providerLabel';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -126,11 +127,19 @@ export function ContentEditor({
           <Tag color={content.status === 'suspended' ? 'red' : 'blue'}>
             {content.status === 'suspended' ? '새 풀이 중단' : '이용 가능'}
           </Tag>
-          <Tag color={content.reviewStatus === 'verified' ? 'green' : 'orange'}>
-            {content.reviewStatus === 'verified'
-              ? `검토 완료 · v${content.version}`
-              : content.needsReview || content.reviewStatus === 'needs_review'
-                ? '재확인 필요'
+          <Typography.Text type='secondary'>
+            {aiProviderLabel(content.provider)} · {content.model}
+          </Typography.Text>
+          <Tag
+            color={
+              !content.needsReview && content.reviewStatus === 'verified'
+                ? 'green'
+                : 'orange'
+            }>
+            {content.needsReview || content.reviewStatus === 'needs_review'
+              ? '재확인 필요'
+              : content.reviewStatus === 'verified'
+                ? `검토 완료 · v${content.version}`
                 : '미검토'}
           </Tag>
         </Space>

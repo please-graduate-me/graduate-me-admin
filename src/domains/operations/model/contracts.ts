@@ -61,7 +61,7 @@ export const materialAccessSchema = z.object({
 /** AI 실행별 공급자·작업·실제 토큰과 응답 시간을 보존한다. */
 export const aiUsageSchema = z.object({
   id: z.string(),
-  provider: z.enum(['naver', 'gemini']),
+  provider: z.enum(['naver', 'anthropic', 'gemini']),
   task: z.string(),
   model: z.string(),
   user: z.object({ id: z.string().nullable(), name: z.string().nullable() }),

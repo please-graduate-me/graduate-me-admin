@@ -6,18 +6,22 @@ const unit = z.number().min(0).max(1);
 export const ocrFieldSchema = z.object({
   text: z.string(),
   rect: z.object({ x: unit, y: unit, width: unit, height: unit }),
-  confidence: unit,
+  confidence: unit.nullable(),
   lineBreak: z.boolean(),
 });
 
 /** 원본 버전과 페이지에 고정된 저장 OCR 상태만 관리 화면에 제공한다. */
 export const materialOcrSchema = z.object({
+  provider: z.enum(['naver', 'anthropic']),
+  model: z.string(),
   configured: z.boolean(),
-  supportedLanguages: z.array(z.literal('en')),
+  supportedLanguages: z.array(z.enum(['en', 'th'])),
   languageSupported: z.boolean(),
   item: z
     .object({
       id: z.uuid(),
+      provider: z.enum(['naver', 'anthropic']).default('naver'),
+      model: z.string().default('모델 기록 없음'),
       materialId: z.string(),
       version: z.number().int().positive(),
       page: z.number().int().positive(),

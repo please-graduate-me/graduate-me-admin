@@ -15,7 +15,9 @@ const parseUsageSearch = (
   ...parseListSearch(raw),
   view: raw.view === 'jobs' ? 'jobs' : 'ai',
   provider:
-    raw.provider === 'naver' || raw.provider === 'gemini'
+    raw.provider === 'naver' ||
+    raw.provider === 'anthropic' ||
+    raw.provider === 'gemini'
       ? raw.provider
       : 'all',
 });

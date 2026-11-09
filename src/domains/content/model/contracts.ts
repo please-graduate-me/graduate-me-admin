@@ -40,7 +40,7 @@ const common = {
   needsReview: z.boolean(),
   source: sourceSchema,
   model: z.string(),
-  provider: z.enum(['naver', 'source']),
+  provider: z.enum(['naver', 'anthropic', 'source']),
   createdAt: z.string().nullable(),
   updatedAt: z.string().nullable(),
 };
