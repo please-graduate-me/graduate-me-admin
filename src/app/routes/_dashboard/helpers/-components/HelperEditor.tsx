@@ -78,6 +78,7 @@ export function HelperEditor({
             materialIds: [],
             canReview: true,
             canRequestEdit: false,
+            canEdit: false,
             active: true,
           }
         }>
@@ -147,6 +148,23 @@ export function HelperEditor({
           ]}
           extra='수정 요청 작성에는 검토 권한도 함께 필요합니다.'>
           <Checkbox>수정 요청 작성</Checkbox>
+        </Form.Item>
+        <Form.Item
+          name='canEdit'
+          valuePropName='checked'
+          dependencies={['canReview']}
+          rules={[
+            ({ getFieldValue }) => ({
+              validator: (_, value) =>
+                value && !getFieldValue('canReview')
+                  ? Promise.reject(
+                      new Error('직접 수정에는 검토 권한도 필요합니다.')
+                    )
+                  : Promise.resolve(),
+            }),
+          ]}
+          extra='배정 자료의 원문·설명·문제를 새 버전으로 수정할 수 있습니다. 수정 이유와 이전 버전이 보존됩니다.'>
+          <Checkbox>새 버전 직접 수정 적용</Checkbox>
         </Form.Item>
         <Form.Item
           name='active'

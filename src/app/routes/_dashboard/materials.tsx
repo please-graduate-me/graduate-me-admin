@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import { Alert, Button, Card, Empty, Table, Tag, Typography } from 'antd';
 import { MaterialRegistration } from './materials/-components/MaterialRegistration';
+import { MaterialAccessEditor } from './materials/-components/MaterialAccessEditor';
+import type { AdminMaterial } from '@/domains/operations/model/contracts';
 import { materialsQuery } from '@/domains/operations/api/operations';
 import { formatDate, formatTime } from '@/domains/questions/lib/format';
 import { PageHeading } from './-components/PageHeading';
@@ -29,6 +31,8 @@ function Materials() {
   const navigate = Route.useNavigate();
   const query = useQuery(materialsQuery);
   const [registrationOpen, setRegistrationOpen] = useState(false);
+  const [editing, setEditing] = useState<AdminMaterial | null>(null);
+  const { access } = Route.useRouteContext();
 
   const change = (patch: Partial<ListSearch>) =>
     void navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true });
@@ -94,6 +98,13 @@ function Materials() {
           onChange: (page) => change({ page }),
         }}
         columns={[
+          {
+            title: '관리',
+            key: 'access',
+            render: (_, item) => (
+              <Button onClick={() => setEditing(item)}>접근 범위</Button>
+            ),
+          },
           { title: '자료', dataIndex: 'title', width: '36%' },
           {
             title: '종류 · 분량',
@@ -140,7 +151,7 @@ function Materials() {
       />
       <Alert
         type='warning'
-        title='분석 실패 자료에는 재시도 기능을 제공하지 않습니다. 원본과 실패 원인을 확인하고 다시 등록하도록 안내해 주세요.'
+        title='분석 실패 자료에는 자동·수동 재시도를 제공하지 않습니다. 저장된 정상 결과와 개인 기록은 계속 이용할 수 있습니다.'
       />
       <Card title='자료의 공개 범위와 도우미 배정은 별개입니다'>
         <Typography.Paragraph className='mb-0!'>
@@ -149,6 +160,14 @@ function Materials() {
           않습니다.
         </Typography.Paragraph>
       </Card>
+      {editing && (
+        <MaterialAccessEditor
+          key={`${editing.kind}:${editing.id}`}
+          material={editing}
+          userId={access.user.id}
+          onClose={() => setEditing(null)}
+        />
+      )}
     </section>
   );
 }

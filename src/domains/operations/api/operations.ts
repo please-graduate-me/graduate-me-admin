@@ -10,6 +10,8 @@ import {
   materialSchema,
   overviewSchema,
   usageSchema,
+  materialAccessSchema,
+  aiUsageResultSchema,
   type HelperInput,
 } from '../model/contracts';
 
@@ -82,6 +84,50 @@ export const usageQuery = queryOptions({
       signal,
     }),
 });
+
+/** 영상 작업 이력과 별도로 실제 AI 실행·토큰·비용 집계를 조회한다. */
+export const aiUsageQuery = queryOptions({
+  queryKey: ['workspace', 'ai-usage'],
+  queryFn: ({ signal }) =>
+    request(`${base}/ai-usage`, aiUsageResultSchema, { signal }),
+});
+
+/** 자료의 원본 접근 범위와 공유 계정을 조회한다. */
+export const materialAccessQuery = (kind: 'pdf' | 'video', id: string) =>
+  queryOptions({
+    queryKey: ['workspace', 'material-access', kind, id],
+    queryFn: ({ signal }) =>
+      request(
+        `${base}/materials/${encodeURIComponent(id)}/access?${new URLSearchParams({ kind })}`,
+        materialAccessSchema,
+        { signal }
+      ),
+  });
+
+/** 공개 범위 변경은 원본 소유권 확인과 함께 서버에 적용한다. */
+export function useSaveMaterialAccess(id: string) {
+  const client = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: {
+      kind: 'pdf' | 'video';
+      visibility: 'private' | 'public' | 'accounts';
+      allowedUserIds: string[];
+    }) =>
+      request(
+        `${base}/materials/${encodeURIComponent(id)}/access`,
+        materialAccessSchema,
+        jsonBody(input, 'PATCH')
+      ),
+    onSuccess: async () => {
+      await client.invalidateQueries({
+        queryKey: ['workspace', 'material-access'],
+      });
+
+      await client.invalidateQueries({ queryKey: ['workspace', 'materials'] });
+    },
+  });
+}
 
 /** 배정 변경 후 기존 질문 접근 권한도 다시 판정하게 한다. */
 export function useSaveHelper() {

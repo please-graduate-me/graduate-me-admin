@@ -130,6 +130,7 @@ function Helpers() {
                 <Tag>답변</Tag>
                 {item.canReview && <Tag>검토</Tag>}
                 {item.canRequestEdit && <Tag>수정 요청</Tag>}
+                {item.canEdit && <Tag color='blue'>직접 수정</Tag>}
               </Space>
             ),
           },
