@@ -10,10 +10,25 @@
 
 import { Route as rootRouteImport } from './routes/__root';
 import { Route as DashboardRouteRouteImport } from './routes/_dashboard/route';
+import { Route as LoginRouteImport } from './routes/login';
 import { Route as DashboardIndexRouteImport } from './routes/_dashboard/index';
+import { Route as DashboardEventsRouteImport } from './routes/_dashboard/events';
+import { Route as DashboardMaterialsRouteImport } from './routes/_dashboard/materials';
+import { Route as DashboardSharesRouteImport } from './routes/_dashboard/shares';
+import { Route as DashboardUsageRouteImport } from './routes/_dashboard/usage';
+import { Route as DashboardHelpersIndexRouteImport } from './routes/_dashboard/helpers/index';
+import { Route as DashboardQuestionsIndexRouteImport } from './routes/_dashboard/questions/index';
+import { Route as DashboardQuestionsQuestionIdRouteImport } from './routes/_dashboard/questions/$questionId';
+import { Route as DashboardReviewsIndexRouteImport } from './routes/_dashboard/reviews/index';
+import { Route as DashboardReviewsReviewIdRouteImport } from './routes/_dashboard/reviews/$reviewId';
 
 const DashboardRouteRoute = DashboardRouteRouteImport.update({
   id: '/_dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any);
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any);
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
@@ -21,28 +36,141 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRouteRoute,
 } as any);
+const DashboardEventsRoute = DashboardEventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => DashboardRouteRoute,
+} as any);
+const DashboardMaterialsRoute = DashboardMaterialsRouteImport.update({
+  id: '/materials',
+  path: '/materials',
+  getParentRoute: () => DashboardRouteRoute,
+} as any);
+const DashboardSharesRoute = DashboardSharesRouteImport.update({
+  id: '/shares',
+  path: '/shares',
+  getParentRoute: () => DashboardRouteRoute,
+} as any);
+const DashboardUsageRoute = DashboardUsageRouteImport.update({
+  id: '/usage',
+  path: '/usage',
+  getParentRoute: () => DashboardRouteRoute,
+} as any);
+const DashboardHelpersIndexRoute = DashboardHelpersIndexRouteImport.update({
+  id: '/helpers/',
+  path: '/helpers/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any);
+const DashboardQuestionsIndexRoute = DashboardQuestionsIndexRouteImport.update({
+  id: '/questions/',
+  path: '/questions/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any);
+const DashboardQuestionsQuestionIdRoute =
+  DashboardQuestionsQuestionIdRouteImport.update({
+    id: '/questions/$questionId',
+    path: '/questions/$questionId',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any);
+const DashboardReviewsIndexRoute = DashboardReviewsIndexRouteImport.update({
+  id: '/reviews/',
+  path: '/reviews/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any);
+const DashboardReviewsReviewIdRoute =
+  DashboardReviewsReviewIdRouteImport.update({
+    id: '/reviews/$reviewId',
+    path: '/reviews/$reviewId',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any);
 
 export interface FileRoutesByFullPath {
   '/': typeof DashboardIndexRoute;
+  '/login': typeof LoginRoute;
+  '/events': typeof DashboardEventsRoute;
+  '/materials': typeof DashboardMaterialsRoute;
+  '/shares': typeof DashboardSharesRoute;
+  '/usage': typeof DashboardUsageRoute;
+  '/questions/$questionId': typeof DashboardQuestionsQuestionIdRoute;
+  '/reviews/$reviewId': typeof DashboardReviewsReviewIdRoute;
+  '/helpers/': typeof DashboardHelpersIndexRoute;
+  '/questions/': typeof DashboardQuestionsIndexRoute;
+  '/reviews/': typeof DashboardReviewsIndexRoute;
 }
 export interface FileRoutesByTo {
+  '/login': typeof LoginRoute;
+  '/events': typeof DashboardEventsRoute;
+  '/materials': typeof DashboardMaterialsRoute;
+  '/shares': typeof DashboardSharesRoute;
+  '/usage': typeof DashboardUsageRoute;
   '/': typeof DashboardIndexRoute;
+  '/questions/$questionId': typeof DashboardQuestionsQuestionIdRoute;
+  '/reviews/$reviewId': typeof DashboardReviewsReviewIdRoute;
+  '/helpers': typeof DashboardHelpersIndexRoute;
+  '/questions': typeof DashboardQuestionsIndexRoute;
+  '/reviews': typeof DashboardReviewsIndexRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   '/_dashboard': typeof DashboardRouteRouteWithChildren;
+  '/login': typeof LoginRoute;
+  '/_dashboard/events': typeof DashboardEventsRoute;
+  '/_dashboard/materials': typeof DashboardMaterialsRoute;
+  '/_dashboard/shares': typeof DashboardSharesRoute;
+  '/_dashboard/usage': typeof DashboardUsageRoute;
   '/_dashboard/': typeof DashboardIndexRoute;
+  '/_dashboard/questions/$questionId': typeof DashboardQuestionsQuestionIdRoute;
+  '/_dashboard/reviews/$reviewId': typeof DashboardReviewsReviewIdRoute;
+  '/_dashboard/helpers/': typeof DashboardHelpersIndexRoute;
+  '/_dashboard/questions/': typeof DashboardQuestionsIndexRoute;
+  '/_dashboard/reviews/': typeof DashboardReviewsIndexRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: '/';
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/events'
+    | '/materials'
+    | '/shares'
+    | '/usage'
+    | '/questions/$questionId'
+    | '/reviews/$reviewId'
+    | '/helpers/'
+    | '/questions/'
+    | '/reviews/';
   fileRoutesByTo: FileRoutesByTo;
-  to: '/';
-  id: '__root__' | '/_dashboard' | '/_dashboard/';
+  to:
+    | '/login'
+    | '/events'
+    | '/materials'
+    | '/shares'
+    | '/usage'
+    | '/'
+    | '/questions/$questionId'
+    | '/reviews/$reviewId'
+    | '/helpers'
+    | '/questions'
+    | '/reviews';
+  id:
+    | '__root__'
+    | '/_dashboard'
+    | '/login'
+    | '/_dashboard/events'
+    | '/_dashboard/materials'
+    | '/_dashboard/shares'
+    | '/_dashboard/usage'
+    | '/_dashboard/'
+    | '/_dashboard/questions/$questionId'
+    | '/_dashboard/reviews/$reviewId'
+    | '/_dashboard/helpers/'
+    | '/_dashboard/questions/'
+    | '/_dashboard/reviews/';
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren;
+  LoginRoute: typeof LoginRoute;
 }
 
 declare module '@tanstack/react-router' {
@@ -54,6 +182,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteRouteImport;
       parentRoute: typeof rootRouteImport;
     };
+    '/login': {
+      id: '/login';
+      path: '/login';
+      fullPath: '/login';
+      preLoaderRoute: typeof LoginRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     '/_dashboard/': {
       id: '/_dashboard/';
       path: '/';
@@ -61,15 +196,96 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport;
       parentRoute: typeof DashboardRouteRoute;
     };
+    '/_dashboard/events': {
+      id: '/_dashboard/events';
+      path: '/events';
+      fullPath: '/events';
+      preLoaderRoute: typeof DashboardEventsRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
+    '/_dashboard/materials': {
+      id: '/_dashboard/materials';
+      path: '/materials';
+      fullPath: '/materials';
+      preLoaderRoute: typeof DashboardMaterialsRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
+    '/_dashboard/shares': {
+      id: '/_dashboard/shares';
+      path: '/shares';
+      fullPath: '/shares';
+      preLoaderRoute: typeof DashboardSharesRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
+    '/_dashboard/usage': {
+      id: '/_dashboard/usage';
+      path: '/usage';
+      fullPath: '/usage';
+      preLoaderRoute: typeof DashboardUsageRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
+    '/_dashboard/helpers/': {
+      id: '/_dashboard/helpers/';
+      path: '/helpers';
+      fullPath: '/helpers/';
+      preLoaderRoute: typeof DashboardHelpersIndexRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
+    '/_dashboard/questions/': {
+      id: '/_dashboard/questions/';
+      path: '/questions';
+      fullPath: '/questions/';
+      preLoaderRoute: typeof DashboardQuestionsIndexRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
+    '/_dashboard/questions/$questionId': {
+      id: '/_dashboard/questions/$questionId';
+      path: '/questions/$questionId';
+      fullPath: '/questions/$questionId';
+      preLoaderRoute: typeof DashboardQuestionsQuestionIdRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
+    '/_dashboard/reviews/': {
+      id: '/_dashboard/reviews/';
+      path: '/reviews';
+      fullPath: '/reviews/';
+      preLoaderRoute: typeof DashboardReviewsIndexRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
+    '/_dashboard/reviews/$reviewId': {
+      id: '/_dashboard/reviews/$reviewId';
+      path: '/reviews/$reviewId';
+      fullPath: '/reviews/$reviewId';
+      preLoaderRoute: typeof DashboardReviewsReviewIdRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
   }
 }
 
 interface DashboardRouteRouteChildren {
+  DashboardEventsRoute: typeof DashboardEventsRoute;
+  DashboardMaterialsRoute: typeof DashboardMaterialsRoute;
+  DashboardSharesRoute: typeof DashboardSharesRoute;
+  DashboardUsageRoute: typeof DashboardUsageRoute;
   DashboardIndexRoute: typeof DashboardIndexRoute;
+  DashboardQuestionsQuestionIdRoute: typeof DashboardQuestionsQuestionIdRoute;
+  DashboardReviewsReviewIdRoute: typeof DashboardReviewsReviewIdRoute;
+  DashboardHelpersIndexRoute: typeof DashboardHelpersIndexRoute;
+  DashboardQuestionsIndexRoute: typeof DashboardQuestionsIndexRoute;
+  DashboardReviewsIndexRoute: typeof DashboardReviewsIndexRoute;
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
+  DashboardEventsRoute: DashboardEventsRoute,
+  DashboardMaterialsRoute: DashboardMaterialsRoute,
+  DashboardSharesRoute: DashboardSharesRoute,
+  DashboardUsageRoute: DashboardUsageRoute,
   DashboardIndexRoute: DashboardIndexRoute,
+  DashboardQuestionsQuestionIdRoute: DashboardQuestionsQuestionIdRoute,
+  DashboardReviewsReviewIdRoute: DashboardReviewsReviewIdRoute,
+  DashboardHelpersIndexRoute: DashboardHelpersIndexRoute,
+  DashboardQuestionsIndexRoute: DashboardQuestionsIndexRoute,
+  DashboardReviewsIndexRoute: DashboardReviewsIndexRoute,
 };
 
 const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
@@ -78,6 +294,7 @@ const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
+  LoginRoute: LoginRoute,
 };
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

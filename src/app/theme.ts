@@ -1,4 +1,25 @@
-import type { ThemeConfig } from 'antd';
+import type { ConfigProviderProps, ThemeConfig } from 'antd';
+
+/** admin 탐색 색상을 Ant Design 테마와 같은 위치에서 관리한다. */
+export const adminNavigation = {
+  background: '#17223b',
+  selected: '#2c3e62',
+  hover: '#22314f',
+  muted: '#a8b5ce',
+};
+
+/** 카드 제목과 본문은 Figma의 한 패널 안에서 연속된 위계로 표시한다. */
+export const adminCardConfig: NonNullable<ConfigProviderProps['card']> = {
+  styles: {
+    header: { borderBottom: 0, padding: '20px 20px 0', minHeight: 48 },
+    body: { padding: 20 },
+  },
+};
+
+/** 목록의 제목 행은 본문보다 작은 12px 위계로 표시한다. */
+export const adminTableConfig: NonNullable<ConfigProviderProps['table']> = {
+  styles: { header: { cell: { fontSize: 12, fontWeight: 400 } } },
+};
 
 /** 관리자 화면의 공통 외형과 CSS 변수 기준을 정의한다. */
 export const adminTheme: ThemeConfig = {
@@ -26,23 +47,24 @@ export const adminTheme: ThemeConfig = {
   components: {
     Layout: {
       headerBg: '#ffffff',
-      siderBg: '#17223b',
+      siderBg: adminNavigation.background,
       headerHeight: 64,
       headerPadding: '0 28px',
     },
     Menu: {
-      darkItemBg: '#17223b',
-      darkItemSelectedBg: '#2c3e62',
-      darkItemHoverBg: '#22314f',
-      darkItemColor: '#a8b5ce',
+      darkItemBg: adminNavigation.background,
+      darkItemSelectedBg: adminNavigation.selected,
+      darkItemHoverBg: adminNavigation.hover,
+      darkItemColor: adminNavigation.muted,
       darkItemSelectedColor: '#ffffff',
-      darkGroupTitleColor: '#a8b5ce',
+      darkGroupTitleColor: adminNavigation.muted,
       itemHeight: 42,
       itemMarginBlock: 8,
       itemMarginInline: 0,
       itemPaddingInline: 12,
       itemBorderRadius: 8,
       iconSize: 20,
+      groupTitleFontSize: 12,
     },
     Typography: { titleMarginTop: 0, titleMarginBottom: 4 },
     Button: { primaryShadow: 'none', defaultShadow: 'none', paddingInline: 20 },
@@ -62,7 +84,11 @@ export const adminTheme: ThemeConfig = {
       headerBorderRadius: 8,
     },
     Tag: { defaultBg: '#f5f6f8', defaultColor: '#667085', borderRadiusSM: 4 },
-    Statistic: { contentFontSize: 30, titleFontSize: 12 },
+    Statistic: {
+      contentFontSize: 30,
+      titleFontSize: 12,
+      fontFamily: "'Inter', 'Noto Sans KR', sans-serif",
+    },
     Tabs: { itemSelectedColor: '#254fca', inkBarColor: '#254fca' },
   },
 };

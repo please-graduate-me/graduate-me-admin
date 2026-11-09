@@ -5,7 +5,7 @@ import { App as AntApp, ConfigProvider } from 'antd';
 import koKR from 'antd/locale/ko_KR';
 import { queryClient } from './queryClient';
 import { router } from './router';
-import { adminTheme } from './theme';
+import { adminCardConfig, adminTableConfig, adminTheme } from './theme';
 
 /** 관리자 앱의 데이터·라우팅·공통 디자인 설정을 연결한다. */
 export function App() {
@@ -13,6 +13,8 @@ export function App() {
     <StyleProvider layer>
       <ConfigProvider
         locale={koKR}
+        card={adminCardConfig}
+        table={adminTableConfig}
         theme={adminTheme}>
         <AntApp>
           <QueryClientProvider client={queryClient}>
