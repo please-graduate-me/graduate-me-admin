@@ -15,6 +15,40 @@ import {
 
 const base = '/api/admin/workspace';
 
+/** 운영자의 명시적인 PDF·영상 등록만 자료 준비 경로에 전달한다. */
+export async function registerAdminMaterial(
+  input:
+    | {
+        kind: 'pdf';
+        title: string;
+        language: 'en' | 'th';
+        filename: string;
+        contentBase64: string;
+        pages: string[];
+      }
+    | { kind: 'video'; url: string; language: 'en' | 'th' }
+) {
+  if (input.kind === 'video') {
+    const result = await request(
+      '/api/videos',
+      z.object({ videoId: z.string() }),
+      jsonBody({ url: input.url, language: input.language })
+    );
+
+    return { kind: input.kind, id: result.videoId };
+  }
+
+  const { kind, ...body } = input;
+
+  const result = await request(
+    '/api/materials',
+    z.object({ id: z.string() }),
+    jsonBody(body)
+  );
+
+  return { kind, id: result.id };
+}
+
 /** 운영 현황은 서버 집계를 사용한다. */
 export const overviewQuery = queryOptions({
   queryKey: ['workspace', 'overview'],

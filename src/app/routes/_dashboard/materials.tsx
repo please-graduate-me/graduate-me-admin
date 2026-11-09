@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, redirect } from '@tanstack/react-router';
-import { Alert, Card, Empty, Table, Tag, Typography } from 'antd';
+import { Alert, Button, Card, Empty, Table, Tag, Typography } from 'antd';
+import { MaterialRegistration } from './materials/-components/MaterialRegistration';
 import { materialsQuery } from '@/domains/operations/api/operations';
 import { formatDate, formatTime } from '@/domains/questions/lib/format';
 import { PageHeading } from './-components/PageHeading';
@@ -26,6 +28,7 @@ function Materials() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
   const query = useQuery(materialsQuery);
+  const [registrationOpen, setRegistrationOpen] = useState(false);
 
   const change = (patch: Partial<ListSearch>) =>
     void navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true });
@@ -44,7 +47,17 @@ function Materials() {
       <PageHeading
         title='자료 관리'
         description='PDF·영상별 최근 100개 자료의 준비 상태와 접근 범위를 확인합니다.'
+        action={
+          <Button
+            type='primary'
+            onClick={() => setRegistrationOpen(true)}>
+            학습 자료 등록
+          </Button>
+        }
       />
+      {registrationOpen && (
+        <MaterialRegistration onClose={() => setRegistrationOpen(false)} />
+      )}
       {query.error && (
         <QueryError
           error={query.error}
