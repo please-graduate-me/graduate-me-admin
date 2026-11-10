@@ -67,6 +67,7 @@ export function ContentEditor({
     if (mutation.isPending) return;
 
     try {
+      // 검토·노출 조치는 미저장 본문을 새 버전으로 잘못 적용하지 않는다.
       const values = await form.validateFields(
         action === 'revisions' ? undefined : ['reason']
       );

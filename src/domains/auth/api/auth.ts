@@ -29,6 +29,7 @@ export async function authenticate(action: 'signin/google' | 'signout') {
     z.object({ csrfToken: z.string() })
   );
 
+  // 하위 경로 배포에서도 관리자 인증 복귀가 학생 앱으로 빠지지 않게 한다.
   const callbackUrl = new URL(
     action === 'signout' ? 'login' : '',
     new URL(import.meta.env.BASE_URL, window.location.origin)

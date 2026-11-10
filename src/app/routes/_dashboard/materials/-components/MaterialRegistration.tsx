@@ -40,6 +40,7 @@ export function MaterialRegistration({ onClose }: { onClose: () => void }) {
   const { message } = App.useApp();
 
   async function submit() {
+    // 등록 횟수가 중복 차감되지 않게 처리 중 재전송을 차단한다.
     if (busy) return;
 
     try {

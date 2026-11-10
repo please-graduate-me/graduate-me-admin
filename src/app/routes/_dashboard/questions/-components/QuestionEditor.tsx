@@ -458,6 +458,7 @@ export function QuestionEditor({
                   (item) => `${item.kind}:${item.id}` === value
                 );
 
+                // 선택한 콘텐츠와 검토 범위·버전 표기가 서로 다른 대상을 가리키지 않게 한다.
                 if (selected)
                   reviewForm.setFieldsValue({
                     scope:

@@ -53,6 +53,7 @@ export function useModerateCommunity() {
         jsonBody(body)
       ),
     onSuccess: async () => {
+      // 숨김·복원은 신고 목록뿐 아니라 운영 현황의 미처리 수에도 영향을 준다.
       await client.invalidateQueries({ queryKey: ['workspace'] });
     },
   });

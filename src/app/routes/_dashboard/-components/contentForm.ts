@@ -24,6 +24,7 @@ export type ContentEditorValues = {
 
 /** 빈칸 인덱스는 영어 공백 단위와 태국어 전체 분절 단위를 그대로 따른다. */
 export function candidateUnits(text: string, language: string) {
+  // 태국어의 구두점·공백도 포함해야 서버에 저장된 빈칸 인덱스와 어긋나지 않는다.
   return language === 'th'
     ? [
         ...new Intl.Segmenter('th', { granularity: 'word' }).segment(
@@ -61,6 +62,7 @@ export function contentEditorPayload(
   content: Content,
   values: ContentEditorValues
 ): Content['payload'] {
+  // 화면에 없는 인용 근거와 메타데이터를 새 버전 작성 중 잃지 않게 한다.
   if (content.kind === 'explanation')
     return {
       ...content.payload,
@@ -92,6 +94,7 @@ export function contentEditorPayload(
       sourceQuote: values.sourceQuote?.trim() ?? content.payload.sourceQuote,
     };
 
+  // null은 후보 미설정이고 빈 배열은 명시적 후보 없음이므로 서로 바꾸지 않는다.
   return {
     text: values.text?.trim() ?? '',
     start: values.start ?? content.payload.start,

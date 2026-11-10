@@ -43,6 +43,7 @@ export const assignmentMaterialsQuery = (
         { signal }
       );
 
+      // PDF 목록과 영상 카탈로그의 검색 차이가 과제 언어 선택을 우회하지 않게 한다.
       return {
         ...result,
         items: result.items.filter(
@@ -117,6 +118,7 @@ export function useCourseMember(courseId: string) {
             jsonBody(input)
           ),
     onSuccess: async () => {
+      // 변경된 수업 역할로 구성원 목록과 과제 접근 범위를 다시 확인하게 한다.
       await client.invalidateQueries({ queryKey: ['courses', courseId] });
     },
   });
@@ -126,6 +128,7 @@ export function useCourseMember(courseId: string) {
 export function useSaveAssignment(courseId: string) {
   const client = useQueryClient();
 
+  // 수정할 때만 기대 버전과 사유를 보내 과거 제출의 기준을 덮어쓰지 않게 한다.
   return useMutation({
     mutationFn: (input: {
       body: AssignmentInput;

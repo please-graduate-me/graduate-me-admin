@@ -18,6 +18,7 @@ export async function request<T>(
   init?: RequestInit
 ): Promise<T> {
   const response = await fetch(path, { credentials: 'same-origin', ...init });
+  // 프록시의 비JSON 오류 응답도 계약 오류 대신 원래 HTTP 실패로 전달한다.
   const body: unknown = await response.json().catch(() => null);
 
   if (!response.ok) {
@@ -32,6 +33,7 @@ export async function request<T>(
     throw new ApiError(response.status, message);
   }
 
+  // 서버와 앱의 계약이 어긋난 데이터를 정상 상태로 캐시에 넣지 않는다.
   const parsed = schema.safeParse(body);
 
   if (!parsed.success)

@@ -74,6 +74,7 @@ export function useContentMutation(questionId: string, content: Content) {
           }
         | { action: 'visibility'; visible: boolean; reason: string }
     ) => {
+      // 새 버전 작성의 충돌 검사와 기존 버전에 대한 검토를 구분한다.
       const { action, ...body } = input;
 
       return request(

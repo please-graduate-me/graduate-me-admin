@@ -147,6 +147,7 @@ export function useQuestionMutation(id: string) {
           }
     ) => {
       const { action, ...body } = input;
+      // 초안 저장이 공개 답변 게시 경로로 섞이지 않게 요청 동작을 구분한다.
       const suffix = action === 'save' ? '' : `/${action}`;
 
       return request(
@@ -156,6 +157,7 @@ export function useQuestionMutation(id: string) {
       );
     },
     onSuccess: async (data) => {
+      // 저장 직후 상세와 배정·검토 집계가 서로 다른 상태를 보여주지 않게 한다.
       client.setQueryData(questionQuery(id).queryKey, data);
 
       await Promise.all(
@@ -186,6 +188,7 @@ export function useResolveReview() {
         jsonBody(body)
       ),
     onSuccess: async () => {
+      // 검토 종료가 질문 상태와 감사 이력에도 반영되므로 관련 목록을 함께 비운다.
       await Promise.all(
         ['questions', 'reviews', 'events', 'overview'].map((key) =>
           client.invalidateQueries({ queryKey: ['workspace', key] })

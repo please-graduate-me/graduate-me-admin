@@ -61,6 +61,7 @@ export async function registerAdminMaterial(
         learningPurposeConfirmed: true;
       }
 ) {
+  // 관리자의 등록도 학생과 같은 목적 확인·자료 한도 검사를 우회하지 않는다.
   if (input.kind === 'video') {
     const result = await request(
       '/api/videos',
@@ -189,6 +190,7 @@ export function useSaveMaterialAccess(id: string) {
         jsonBody(input, 'PATCH')
       ),
     onSuccess: async () => {
+      // 공개 범위 편집기와 자료 목록이 이전 접근 상태를 서로 다르게 표시하지 않게 한다.
       await client.invalidateQueries({
         queryKey: ['workspace', 'material-access'],
       });
@@ -206,6 +208,7 @@ export function useSaveHelper() {
     mutationFn: (input: HelperInput) =>
       request(`${base}/helpers`, helperSchema, jsonBody(input)),
     onSuccess: async () => {
+      // 도우미 배정 변경으로 질문·검토의 접근 판정과 운영 집계가 달라질 수 있다.
       await client.invalidateQueries({ queryKey: ['workspace'] });
     },
   });

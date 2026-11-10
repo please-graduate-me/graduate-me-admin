@@ -111,6 +111,7 @@ export function AssignmentEditor({
               ...(values.kind === 'pdf'
                 ? { materialId: values.sourceId }
                 : { videoId: values.sourceId }),
+              // 표시 번호와 저장 인덱스의 차이로 과제가 한 구절 밀려 배정되지 않게 한다.
               fromIndex: values.from - 1,
               toIndex: values.to - 1,
               mode: values.kind === 'pdf' ? 'reading' : values.mode,

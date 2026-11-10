@@ -27,6 +27,7 @@ export async function extractMaterialPdf(
     const pages: string[] = [];
     let totalCharacters = 0;
 
+    // 페이지별 상한과 전체 상한을 함께 검사해 압축된 PDF의 과도한 텍스트 확장을 막는다.
     for (let number = 1; number <= document.numPages; number++) {
       const page = await document.getPage(number);
       const content = await page.getTextContent();
@@ -51,6 +52,7 @@ export async function extractMaterialPdf(
 
     return pages;
   } finally {
+    // 중간 페이지에서 검사가 실패해도 PDF 작업 자원이 남지 않게 한다.
     await task.destroy();
   }
 }

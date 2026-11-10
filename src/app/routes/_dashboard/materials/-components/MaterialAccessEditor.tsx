@@ -53,6 +53,7 @@ export function MaterialAccessEditor({
       await mutation.mutateAsync({
         kind: material.kind,
         visibility: values.visibility,
+        // 특정 계정 공개를 해제할 때 이전 허용 목록이 뒤에 남지 않게 한다.
         allowedUserIds:
           values.visibility === 'accounts' ? values.allowedUserIds : [],
       });

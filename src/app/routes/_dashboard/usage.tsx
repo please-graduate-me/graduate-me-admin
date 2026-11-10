@@ -15,6 +15,7 @@ const parseUsageSearch = (
   const parsed = parseListSearch(raw);
   const view = raw.view === 'jobs' ? 'jobs' : 'ai';
 
+  // 탭을 바꾼 주소의 다른 이력용 상태가 서버 계약 검증을 막지 않게 한다.
   const statuses =
     view === 'jobs'
       ? ['all', 'queued', 'preparing', 'transcribing', 'ready', 'failed']

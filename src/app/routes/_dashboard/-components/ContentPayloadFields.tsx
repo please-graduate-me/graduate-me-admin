@@ -66,6 +66,7 @@ export function ContentPayloadFields({
             { max: 16007 },
             {
               validator: (_, value: string) => {
+                // 빈 줄이 서버의 예문 수 제한을 잘못 차감하지 않게 같은 기준으로 검증한다.
                 const examples = (value ?? '')
                   .split(/\r?\n/)
                   .map((item) => item.trim())
@@ -134,6 +135,7 @@ export function ContentPayloadFields({
               { required: true, whitespace: true },
               {
                 validator: (_, value: string) => {
+                  // 중복 선택지가 두 정답처럼 보이는 모호한 문항을 새 버전에 저장하지 않는다.
                   const choices = (value ?? '')
                     .split(/\r?\n/)
                     .map((v) => v.trim())

@@ -2,6 +2,7 @@ import type { Source } from '../model/contracts';
 
 /** 발췌의 위치·버전을 학생 뷰어에 전달하되 원본 접근 권한은 별도로 검사하게 한다. */
 export function sourceHref(source: Source) {
+  // 출처 위치는 이동 힌트일 뿐이며 원본 접근은 학생 뷰어의 서버 권한 검사를 거친다.
   const query = new URLSearchParams({
     page: String(source.kind === 'pdf' ? source.page : 1),
     quote: source.quote,
