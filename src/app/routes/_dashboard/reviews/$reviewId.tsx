@@ -16,7 +16,7 @@ import { SourceExcerpt } from '@/domains/questions/ui/SourceExcerpt';
 import { PageHeading } from '../-components/PageHeading';
 import { QueryError } from '../-components/QueryError';
 import { ReviewDecision } from './-components/ReviewDecision';
-import { QuestionContentPanel } from '../questions/-components/QuestionContentPanel';
+import { QuestionContentPanel } from '../-components/QuestionContentPanel';
 
 /** 선택한 검토 요청의 공유 근거와 운영 조치를 연결한다. */
 export const Route = createFileRoute('/_dashboard/reviews/$reviewId')({

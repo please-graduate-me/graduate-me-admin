@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { targetSchema } from '@/domains/content/model/target';
+import { targetSchema } from './target';
 
 const personSchema = z.object({ id: z.string(), name: z.string().nullable() });
 

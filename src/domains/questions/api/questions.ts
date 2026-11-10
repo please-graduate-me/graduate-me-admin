@@ -5,7 +5,7 @@ import {
 } from '@tanstack/react-query';
 import { z } from 'zod';
 import { jsonBody, request } from '@/lib/api/request';
-import type { ContentTarget } from '@/domains/content/model/target';
+import type { ContentTarget } from '../model/target';
 import {
   eventSchema,
   questionDetailSchema,

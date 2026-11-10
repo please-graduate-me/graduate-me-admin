@@ -25,7 +25,7 @@ import { QuestionStatus } from '@/domains/questions/ui/QuestionStatus';
 import { SourceExcerpt } from '@/domains/questions/ui/SourceExcerpt';
 import { PageHeading } from '../../-components/PageHeading';
 import { contentQuery } from '@/domains/content/api/content';
-import { QuestionContentPanel } from './QuestionContentPanel';
+import { QuestionContentPanel } from '../../-components/QuestionContentPanel';
 
 type EditorValues = { draft: string; internalNote: string };
 type ReviewValues = {
