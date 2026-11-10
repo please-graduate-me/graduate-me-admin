@@ -10,7 +10,7 @@ import {
   Tag,
   Typography,
 } from 'antd';
-import { reviewsQuery } from '@/domains/questions/api/questions';
+import { reviewQuery } from '@/domains/questions/api/questions';
 import { formatDate } from '@/domains/questions/lib/format';
 import { SourceExcerpt } from '@/domains/questions/ui/SourceExcerpt';
 import { PageHeading } from '../-components/PageHeading';
@@ -30,7 +30,7 @@ function ReviewDetail() {
   const { access } = Route.useRouteContext();
   const navigate = Route.useNavigate();
   const { reviewId } = Route.useParams();
-  const query = useQuery(reviewsQuery);
+  const query = useQuery(reviewQuery(reviewId));
 
   if (query.error)
     return (
@@ -46,7 +46,7 @@ function ReviewDetail() {
       </Spin>
     );
 
-  const review = query.data?.items.find((item) => item.id === reviewId);
+  const review = query.data;
 
   if (!review)
     return (

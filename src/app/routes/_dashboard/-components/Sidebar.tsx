@@ -9,36 +9,54 @@ import { adminNavigation } from '../../../theme';
 export function Sidebar({ access }: { access: WorkspaceAccess }) {
   const pathname = useLocation({ select: (location) => location.pathname });
   const { token } = theme.useToken();
-  const selected = pathname.startsWith('/questions') ? '/questions' : pathname;
 
-  const items: MenuProps['items'] = [
-    {
-      type: 'group',
-      label: '답변 도우미',
-      children: [
+  const selected = pathname.startsWith('/questions')
+    ? '/questions'
+    : pathname.startsWith('/courses')
+      ? '/courses'
+      : pathname;
+
+  const items: MenuProps['items'] = access.role
+    ? [
         {
-          key: '/questions',
-          icon: (
-            <SidebarIcon
-              name='message-circle'
-              selected={selected === '/questions'}
-            />
-          ),
-          label: <Link to='/questions'>내 질문함</Link>,
+          type: 'group',
+          label: '답변 도우미',
+          children: [
+            {
+              key: '/questions',
+              icon: (
+                <SidebarIcon
+                  name='message-circle'
+                  selected={selected === '/questions'}
+                />
+              ),
+              label: <Link to='/questions'>내 질문함</Link>,
+            },
+            {
+              key: '/events',
+              icon: (
+                <SidebarIcon
+                  name='clock'
+                  selected={selected === '/events'}
+                />
+              ),
+              label: <Link to='/events'>검토 이력</Link>,
+            },
+          ],
         },
-        {
-          key: '/events',
-          icon: (
-            <SidebarIcon
-              name='clock'
-              selected={selected === '/events'}
-            />
-          ),
-          label: <Link to='/events'>검토 이력</Link>,
-        },
-      ],
-    },
-  ];
+      ]
+    : [];
+
+  items.push({
+    key: '/courses',
+    icon: (
+      <SidebarIcon
+        name='users'
+        selected={selected === '/courses'}
+      />
+    ),
+    label: <Link to='/courses'>수업 · 과제 관리</Link>,
+  });
 
   if (access.role === 'admin')
     items.push({
@@ -74,6 +92,16 @@ export function Sidebar({ access }: { access: WorkspaceAccess }) {
             />
           ),
           label: <Link to='/reviews'>신고 · 수정 요청</Link>,
+        },
+        {
+          key: '/moderation',
+          icon: (
+            <SidebarIcon
+              name='flag'
+              selected={selected === '/moderation'}
+            />
+          ),
+          label: <Link to='/moderation'>게시물 신고</Link>,
         },
         {
           key: '/helpers',
@@ -139,12 +167,18 @@ export function Sidebar({ access }: { access: WorkspaceAccess }) {
         <Typography.Paragraph
           style={{ color: token.colorWhite, fontSize: 12, marginBottom: 4 }}>
           {access.user.name || access.user.email} ·{' '}
-          {access.role === 'admin' ? '운영 관리자' : '학과 답변 도우미'}
+          {access.role === 'admin'
+            ? '운영 관리자'
+            : access.role === 'helper'
+              ? '학과 답변 도우미'
+              : '수업 운영'}
         </Typography.Paragraph>
         <Typography.Text style={{ color: adminNavigation.muted, fontSize: 12 }}>
           {access.role === 'admin'
             ? '운영 권한'
-            : `${access.languages.map((l) => (l === 'en' ? '영어' : l === 'th' ? '태국어' : l)).join(', ')} · 배정 자료 ${access.materialIds.length}개`}
+            : !access.role
+              ? '수업별 역할에 따라 관리'
+              : `${access.languages.map((l) => (l === 'en' ? '영어' : l === 'th' ? '태국어' : l)).join(', ')} · 배정 자료 ${access.materialIds.length}개`}
         </Typography.Text>
       </div>
     </nav>

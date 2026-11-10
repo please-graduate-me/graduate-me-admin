@@ -7,13 +7,15 @@ import {
   reviewsQuery,
 } from '@/domains/questions/api/questions';
 import { formatDate } from '@/domains/questions/lib/format';
+import { communityReportsQuery } from '@/domains/operations/api/moderation';
 import { PageHeading } from './-components/PageHeading';
 import { QueryError } from './-components/QueryError';
 
 /** 운영자는 집계로, 도우미는 배정 질문함으로 진입한다. */
 export const Route = createFileRoute('/_dashboard/')({
   beforeLoad: ({ context }) => {
-    if (context.access.role !== 'admin') throw redirect({ to: '/questions' });
+    if (context.access.role !== 'admin')
+      throw redirect({ to: context.access.role ? '/questions' : '/courses' });
   },
   component: Overview,
 });
@@ -24,6 +26,10 @@ function Overview() {
   const reviews = useQuery(reviewsQuery);
   const usage = useQuery(usageQuery);
 
+  const community = useQuery(
+    communityReportsQuery({ page: 1, q: '', status: 'open', period: 'all' })
+  );
+
   const counts = [
     ['자료 처리 중', summary.data?.processing],
     ['미답변 질문', summary.data?.waiting],
@@ -32,6 +38,15 @@ function Overview() {
   ] as const;
 
   const tasks = [
+    ...(community.data?.items ?? []).map((item) => ({
+      id: `post-report-${item.id}`,
+      title: item.reason,
+      target: item.post.title,
+      actor: item.reporter.name,
+      status: '게시물 신고',
+      updatedAt: item.updatedAt,
+      href: '/moderation',
+    })),
     ...(reviews.data?.items ?? [])
       .filter((item) => item.status === 'open')
       .map((item) => ({
@@ -70,7 +85,11 @@ function Overview() {
     .slice(0, 10);
 
   const error =
-    summary.error || questions.error || reviews.error || usage.error;
+    summary.error ||
+    questions.error ||
+    reviews.error ||
+    usage.error ||
+    community.error;
 
   return (
     <section className='flex flex-col gap-5'>
@@ -86,6 +105,7 @@ function Overview() {
             questions.refetch();
             reviews.refetch();
             usage.refetch();
+            community.refetch();
           }}
         />
       )}

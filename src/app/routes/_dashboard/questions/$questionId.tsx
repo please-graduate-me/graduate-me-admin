@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 import { Button, Result, Spin } from 'antd';
 import { questionQuery } from '@/domains/questions/api/questions';
 import { QuestionEditor } from './-components/QuestionEditor';
@@ -7,6 +7,9 @@ import { QueryError } from '../-components/QueryError';
 
 /** 질문 식별자를 admin 전용 상세 조회와 연결한다. */
 export const Route = createFileRoute('/_dashboard/questions/$questionId')({
+  beforeLoad: ({ context }) => {
+    if (!context.access.role) throw redirect({ to: '/courses' });
+  },
   component: QuestionDetail,
 });
 

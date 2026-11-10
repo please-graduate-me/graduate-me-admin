@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { createFileRoute, Navigate } from '@tanstack/react-router';
+import { createFileRoute, Link, Navigate } from '@tanstack/react-router';
 import { Alert, Button, Card, Space, Typography } from 'antd';
 import {
   accessQuery,
@@ -42,14 +42,18 @@ function Login() {
             </Typography.Text>
             <Typography.Title level={2}>학습 운영 작업 공간</Typography.Title>
             <Typography.Paragraph type='secondary'>
-              학과 답변 도우미와 운영 관리자는 배정된 계정으로 로그인해 주세요.
+              학과 답변 도우미와 운영 관리자, 수업 담당자는 Google 계정으로
+              로그인해 주세요.
             </Typography.Paragraph>
           </div>
           {access.data && !access.data.role && (
+            <Link to='/courses'>수업 · 과제 관리로 이동</Link>
+          )}
+          {access.data && !access.data.role && (
             <Alert
               type='warning'
-              title='이 계정에는 admin 접근 권한이 없습니다.'
-              description='운영 관리자에게 담당 언어와 자료 배정을 요청해 주세요.'
+              title='학과 도우미·전체 운영 권한이 없는 계정입니다.'
+              description='수업 관리는 위 링크에서 이용할 수 있습니다. 학과 도우미 배정은 운영 관리자에게 요청해 주세요.'
             />
           )}
           {status.data && !status.data.configured && (

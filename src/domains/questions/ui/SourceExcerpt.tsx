@@ -1,8 +1,9 @@
 import { Button, Space, Typography, theme } from 'antd';
 import type { Source } from '../model/contracts';
 import { sourceLabel } from '../lib/format';
+import { sourceHref } from '../lib/sourceHref';
 
-/** 배정된 질문의 발췌만 표시하고 비공개 원본 자료 전체로 연결하지 않는다. */
+/** 공유 발췌와 원본 접근을 구분하고 뷰어에서 자료 권한을 별도로 확인한다. */
 export function SourceExcerpt({ source }: { source: Source }) {
   const { token } = theme.useToken();
 
@@ -36,6 +37,12 @@ export function SourceExcerpt({ source }: { source: Source }) {
         질문자가 공유한 발췌만 표시합니다. 개인 메모와 전체 학습 기록은 표시하지
         않습니다.
       </Typography.Text>
+      <Button
+        href={sourceHref(source)}
+        target='_blank'
+        rel='noreferrer'>
+        근거 원문 열기 · 자료 권한 필요
+      </Button>
       {source.kind === 'video' && source.youtubeId && (
         <Button
           href={`https://www.youtube.com/watch?v=${encodeURIComponent(source.youtubeId)}&t=${Math.floor(source.start ?? 0)}`}

@@ -1,41 +1,32 @@
 import { useQuery } from '@tanstack/react-query';
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, Link, redirect } from '@tanstack/react-router';
 import { Alert, Card, Empty, Table, Tag, Typography } from 'antd';
-import { eventsQuery } from '@/domains/questions/api/questions';
+import { eventListQuery } from '@/domains/questions/api/questions';
 import { eventLabels } from '@/domains/questions/config/events';
 import { formatDate } from '@/domains/questions/lib/format';
 import { PageHeading } from './-components/PageHeading';
 import { QueryError } from './-components/QueryError';
 import { ListFilters } from './-components/ListFilters';
-import {
-  inPeriod,
-  parseListSearch,
-  tablePage,
-  type ListSearch,
-} from './-components/listSearch';
+import { parseListSearch, type ListSearch } from './-components/listSearch';
 
 /** admin 내부 이력을 학생의 공개 대화와 별도 경로에서 조회한다. */
 export const Route = createFileRoute('/_dashboard/events')({
   validateSearch: parseListSearch,
+  beforeLoad: ({ context }) => {
+    if (!context.access.role) throw redirect({ to: '/courses' });
+  },
   component: Events,
 });
 
 function Events() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
-  const query = useQuery(eventsQuery);
+  const query = useQuery(eventListQuery(search));
 
   const change = (patch: Partial<ListSearch>) =>
     void navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true });
 
-  const items = (query.data?.items ?? []).filter(
-    (item) =>
-      inPeriod(item.createdAt, search.period) &&
-      (search.status === 'all' || item.visibility === search.status) &&
-      `${item.questionId ?? ''} ${item.action} ${item.detail} ${item.actor.name ?? ''}`
-        .toLowerCase()
-        .includes(search.q.toLowerCase())
-  );
+  const items = query.data?.items ?? [];
 
   return (
     <section className='flex flex-col gap-5'>
@@ -71,9 +62,9 @@ function Events() {
           ),
         }}
         pagination={{
-          current: tablePage(search.page, items.length),
+          current: search.page,
           pageSize: 20,
-          total: items.length,
+          total: query.data?.total ?? 0,
           showSizeChanger: false,
           onChange: (page) => change({ page }),
         }}

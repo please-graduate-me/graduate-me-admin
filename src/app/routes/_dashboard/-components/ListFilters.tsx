@@ -1,4 +1,4 @@
-import { Input, Select } from 'antd';
+import { Button, Input, Select } from 'antd';
 import type { ListSearch } from './listSearch';
 
 /** 검색·상태·기간 필터를 URL을 소유하는 목록 화면에 연결한다. */
@@ -18,12 +18,19 @@ export function ListFilters({
   allStatusLabel?: string;
 }) {
   return (
-    <div className='flex items-center gap-3'>
-      <Input.Search
+    <form
+      className='flex items-center gap-3'
+      onSubmit={(event) => {
+        event.preventDefault();
+        const q = new FormData(event.currentTarget).get('q');
+
+        onChange({ q: typeof q === 'string' ? q : '', page: 1 });
+      }}>
+      <Input
         maxLength={100}
-        value={value.q}
-        onChange={(event) => onChange({ q: event.target.value, page: 1 })}
-        onSearch={(q) => onChange({ q, page: 1 })}
+        key={value.q}
+        name='q'
+        defaultValue={value.q}
         placeholder={placeholder}
         aria-label={placeholder}
         className='w-80!'
@@ -51,6 +58,13 @@ export function ListFilters({
           aria-label='기간 필터'
         />
       )}
-    </div>
+      <div className='flex-1' />
+      <Button
+        type='primary'
+        htmlType='submit'
+        className='w-33!'>
+        검색
+      </Button>
+    </form>
   );
 }

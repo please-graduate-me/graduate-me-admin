@@ -15,17 +15,12 @@ import { MaterialRegistration } from './materials/-components/MaterialRegistrati
 import { MaterialAccessEditor } from './materials/-components/MaterialAccessEditor';
 import { MaterialOcrPanel } from './materials/-components/MaterialOcrPanel';
 import type { AdminMaterial } from '@/domains/operations/model/contracts';
-import { materialsQuery } from '@/domains/operations/api/operations';
+import { materialListQuery } from '@/domains/operations/api/operations';
 import { formatDate, formatTime } from '@/domains/questions/lib/format';
 import { PageHeading } from './-components/PageHeading';
 import { QueryError } from './-components/QueryError';
 import { ListFilters } from './-components/ListFilters';
-import {
-  inPeriod,
-  parseListSearch,
-  tablePage,
-  type ListSearch,
-} from './-components/listSearch';
+import { parseListSearch, type ListSearch } from './-components/listSearch';
 
 /** 운영자에게 자료 처리 상태와 최소 소유 정보만 표시한다. */
 export const Route = createFileRoute('/_dashboard/materials')({
@@ -39,7 +34,7 @@ export const Route = createFileRoute('/_dashboard/materials')({
 function Materials() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
-  const query = useQuery(materialsQuery);
+  const query = useQuery(materialListQuery(search));
   const [registrationOpen, setRegistrationOpen] = useState(false);
   const [editing, setEditing] = useState<AdminMaterial | null>(null);
   const [recognizing, setRecognizing] = useState<AdminMaterial | null>(null);
@@ -48,20 +43,13 @@ function Materials() {
   const change = (patch: Partial<ListSearch>) =>
     void navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true });
 
-  const items = (query.data?.items ?? []).filter(
-    (item) =>
-      (search.status === 'all' || item.kind === search.status) &&
-      inPeriod(item.createdAt, search.period) &&
-      `${item.title} ${item.owner?.name ?? ''}`
-        .toLowerCase()
-        .includes(search.q.toLowerCase())
-  );
+  const items = query.data?.items ?? [];
 
   return (
     <section className='flex flex-col gap-5'>
       <PageHeading
         title='자료 관리'
-        description='PDF·영상별 최근 100개 자료의 준비 상태와 접근 범위를 확인합니다.'
+        description='PDF·영상 자료 전체에서 준비 상태와 접근 범위를 확인합니다.'
         action={
           <Button
             type='primary'
@@ -102,9 +90,9 @@ function Materials() {
           ),
         }}
         pagination={{
-          current: tablePage(search.page, items.length),
+          current: search.page,
           pageSize: 20,
-          total: items.length,
+          total: query.data?.total ?? 0,
           showSizeChanger: false,
           onChange: (page) => change({ page }),
         }}
@@ -136,9 +124,7 @@ function Materials() {
             title: '접근 범위',
             key: 'owner',
             render: (_, item) =>
-              item.owner
-                ? `개인 · ${item.owner.name || '이름 없음'}`
-                : '공유 영상 원본',
+              `${item.visibility === 'public' ? '공용' : item.visibility === 'accounts' ? '지정 계정' : '비공개'}${item.owner ? ` · ${item.owner.name || '이름 없음'}` : ''}`,
           },
           {
             title: '처리 상태',
@@ -158,6 +144,9 @@ function Materials() {
                     ready: '준비 완료',
                     pending: '대기 중',
                     processing: '처리 중',
+                    queued: '대기 중',
+                    preparing: '자료 준비 중',
+                    transcribing: '전사 중',
                     failed: '처리 실패',
                   } as Record<string, string>
                 )[status.toLowerCase()] || status}

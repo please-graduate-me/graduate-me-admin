@@ -9,8 +9,6 @@ export const Route = createFileRoute('/_dashboard')({
     try {
       const access = await context.queryClient.fetchQuery(accessQuery);
 
-      if (!access.role) throw redirect({ to: '/login' });
-
       return { access };
     } catch (error) {
       if (error instanceof ApiError && error.status === 401)

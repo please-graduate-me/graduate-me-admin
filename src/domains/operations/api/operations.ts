@@ -17,6 +17,31 @@ import {
 
 const base = '/api/admin/workspace';
 
+const materialListSchema = z.object({
+  items: z.array(materialSchema),
+  page: z.number(),
+  limit: z.number(),
+  total: z.number(),
+  hasMore: z.boolean(),
+});
+
+/** 목록의 검색·기간·페이지 조건을 서버의 자료 메타데이터 전체에 적용한다. */
+export const materialListQuery = (search: {
+  page: number;
+  q: string;
+  status: string;
+  period: string;
+}) =>
+  queryOptions({
+    queryKey: ['workspace', 'materials', 'list', search],
+    queryFn: ({ signal }) =>
+      request(
+        `${base}/materials?${new URLSearchParams({ ...search, page: String(search.page), limit: '20' })}`,
+        materialListSchema,
+        { signal }
+      ),
+  });
+
 /** 운영자의 명시적인 PDF·영상 등록만 자료 준비 경로에 전달한다. */
 export async function registerAdminMaterial(
   input:
@@ -71,10 +96,25 @@ export const overviewQuery = queryOptions({
 /** 자료의 처리 상태와 소유 범위만 조회한다. */
 export const materialsQuery = queryOptions({
   queryKey: ['workspace', 'materials'],
-  queryFn: ({ signal }) =>
-    request(`${base}/materials`, z.object({ items: z.array(materialSchema) }), {
-      signal,
-    }),
+  queryFn: async ({ signal }) => {
+    const items: z.infer<typeof materialSchema>[] = [];
+    // 도우미 배정 선택지에서도 최근 100개 이전 자료를 찾을 수 있게 한다.
+    let page = 1;
+
+    while (true) {
+      const result = await request(
+        `${base}/materials?page=${page}&limit=100`,
+        materialListSchema,
+        { signal }
+      );
+
+      items.push(...result.items);
+      if (!result.hasMore) break;
+      page += 1;
+    }
+
+    return { items };
+  },
 });
 
 /** 도우미 배정 목록을 질문 배정과 권한 편집에서 공유한다. */

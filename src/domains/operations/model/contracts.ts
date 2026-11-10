@@ -21,6 +21,7 @@ export const materialSchema = z.object({
   duration: z.number().nullable(),
   status: z.string(),
   createdAt: z.string(),
+  visibility: z.enum(['private', 'public', 'accounts']),
 });
 
 /** 도우미의 담당 언어·자료와 작업 권한은 개별 필드로 관리한다. */

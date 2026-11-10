@@ -28,7 +28,12 @@ export function DashboardLayout() {
           <Typography.Text
             type='secondary'
             style={{ fontSize: 12 }}>
-            관리 콘솔 / {access.role === 'admin' ? '운영 관리' : '답변 도우미'}
+            관리 콘솔 /{' '}
+            {access.role === 'admin'
+              ? '운영 관리'
+              : access.role === 'helper'
+                ? '답변 도우미'
+                : '수업 운영'}
           </Typography.Text>
           <Space size={16}>
             <img
@@ -38,7 +43,11 @@ export function DashboardLayout() {
               height={20}
             />
             <Typography.Text style={{ fontSize: 12 }}>
-              {access.role === 'admin' ? '운영 관리자' : '학과 답변 도우미'}
+              {access.role === 'admin'
+                ? '운영 관리자'
+                : access.role === 'helper'
+                  ? '학과 답변 도우미'
+                  : '수업 담당 계정'}
             </Typography.Text>
             <Tag bordered={false}>admin</Tag>
             <Button

@@ -4,7 +4,7 @@ type Props = { name: string; selected?: boolean };
 export function SidebarIcon({ name, selected = false }: Props) {
   return (
     <img
-      src={`/icons/${name}.svg`}
+      src={`${import.meta.env.BASE_URL}icons/${name}.svg`}
       alt=''
       width={20}
       height={20}

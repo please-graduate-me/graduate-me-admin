@@ -1,22 +1,23 @@
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link, redirect } from '@tanstack/react-router';
+import type { SearchSchemaInput } from '@tanstack/react-router';
 import { Alert, Empty, Segmented, Table, Tag } from 'antd';
-import { useState } from 'react';
-import { reviewsQuery } from '@/domains/questions/api/questions';
+import { reviewListQuery } from '@/domains/questions/api/questions';
 import { formatDate, sourceLabel } from '@/domains/questions/lib/format';
 import { PageHeading } from '../-components/PageHeading';
 import { QueryError } from '../-components/QueryError';
 import { ListFilters } from '../-components/ListFilters';
-import {
-  inPeriod,
-  parseListSearch,
-  tablePage,
-  type ListSearch,
-} from '../-components/listSearch';
+import { parseListSearch, type ListSearch } from '../-components/listSearch';
 
 /** 운영자에게 근거와 버전이 명시된 검토 요청 목록을 제공한다. */
 export const Route = createFileRoute('/_dashboard/reviews/')({
-  validateSearch: parseListSearch,
+  validateSearch: (
+    raw: Partial<ListSearch> & { kind?: string } & SearchSchemaInput
+  ) => ({
+    ...parseListSearch(raw),
+    kind:
+      raw.kind === 'report' || raw.kind === 'review_request' ? raw.kind : 'all',
+  }),
   beforeLoad: ({ context }) => {
     if (context.access.role !== 'admin') throw redirect({ to: '/questions' });
   },
@@ -26,21 +27,12 @@ export const Route = createFileRoute('/_dashboard/reviews/')({
 function Reviews() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
-  const query = useQuery(reviewsQuery);
-  const [kind, setKind] = useState<'all' | 'report' | 'review_request'>('all');
+  const query = useQuery(reviewListQuery(search));
 
   const change = (patch: Partial<ListSearch>) =>
     void navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true });
 
-  const items = (query.data?.items ?? []).filter(
-    (item) =>
-      (kind === 'all' || item.kind === kind) &&
-      (search.status === 'all' || item.status === search.status) &&
-      inPeriod(item.createdAt, search.period) &&
-      `${item.reason} ${item.source.title} ${item.version}`
-        .toLowerCase()
-        .includes(search.q.toLowerCase())
-  );
+  const items = query.data?.items ?? [];
 
   return (
     <section className='flex flex-col gap-5'>
@@ -49,8 +41,17 @@ function Reviews() {
         description='원문 근거와 변경 영향을 확인한 뒤 조치 사유를 기록합니다.'
       />
       <Segmented
-        value={kind}
-        onChange={(value) => setKind(value as typeof kind)}
+        value={search.kind}
+        onChange={(kind) =>
+          void navigate({
+            search: (previous) => ({
+              ...previous,
+              kind: String(kind),
+              page: 1,
+            }),
+            replace: true,
+          })
+        }
         options={[
           { value: 'all', label: '전체' },
           { value: 'report', label: '학생 오류 신고' },
@@ -86,9 +87,9 @@ function Reviews() {
           ),
         }}
         pagination={{
-          current: tablePage(search.page, items.length),
+          current: search.page,
           pageSize: 20,
-          total: items.length,
+          total: query.data?.total ?? 0,
           showSizeChanger: false,
           onChange: (page) => change({ page }),
         }}

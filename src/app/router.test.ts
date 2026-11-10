@@ -169,6 +169,34 @@ describe('관리자 라우팅', () => {
     expect(match?.status).toBe('success');
   });
 
+  it('전체 운영 역할이 없는 로그인 계정도 본인 수업 관리에 진입할 수 있다', async () => {
+    role = null;
+    const testRouter = createTestRouter('/courses');
+
+    await testRouter.load();
+
+    expect(testRouter.state.matches.at(-1)?.routeId).toBe(
+      '/_dashboard/courses/'
+    );
+
+    expect(testRouter.state.matches.at(-1)?.status).toBe('success');
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('수업 담당 계정에게 학과 도우미 질문함을 열지 않는다', async () => {
+    role = null;
+    const testRouter = createTestRouter('/questions');
+
+    await testRouter.load();
+    const result = testRouter._serverResult;
+
+    expect(result?.type === 'redirect' && result.redirect.options.to).toBe(
+      '/courses'
+    );
+
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
   it('등록되지 않은 경로는 대시보드 대신 404로 처리한다', async () => {
     const testRouter = createTestRouter('/missing-page');
 

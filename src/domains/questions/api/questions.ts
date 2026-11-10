@@ -15,19 +15,82 @@ import {
 
 const base = '/api/admin/workspace';
 
-/** 목록과 배정 작업이 동일한 서버 질문 상태를 참조한다. */
-export const questionsQuery = (page = 1, q = '') =>
+const pageFields = {
+  page: z.number(),
+  limit: z.number(),
+  total: z.number(),
+  hasMore: z.boolean(),
+};
+
+type HistorySearch = {
+  page: number;
+  q: string;
+  status: string;
+  period: string;
+  kind?: string;
+};
+
+const historyParams = (search: HistorySearch) =>
+  new URLSearchParams({ ...search, page: String(search.page), limit: '20' });
+
+/** 과거 검토 요청도 상태·기간·종류에 맞춰 서버에서 조회한다. */
+export const reviewListQuery = (search: HistorySearch) =>
   queryOptions({
-    queryKey: ['workspace', 'questions', 'list', page, q],
+    queryKey: ['workspace', 'reviews', 'list', search],
     queryFn: ({ signal }) =>
       request(
-        `${base}/questions?${new URLSearchParams({ page: String(page), limit: '20', q })}`,
+        `${base}/reviews?${historyParams(search)}`,
+        z.object({ items: z.array(reviewSchema), ...pageFields }),
+        { signal }
+      ),
+  });
+
+/** 최근 목록에 없는 검토 요청도 식별자로 직접 조회한다. */
+export const reviewQuery = (id: string) =>
+  queryOptions({
+    queryKey: ['workspace', 'reviews', id],
+    queryFn: ({ signal }) =>
+      request(`${base}/reviews/${encodeURIComponent(id)}`, reviewSchema, {
+        signal,
+      }),
+  });
+
+/** 검색과 페이지 이동이 전체 접근 가능한 감사 이력에 적용된다. */
+export const eventListQuery = (search: HistorySearch) =>
+  queryOptions({
+    queryKey: ['workspace', 'events', 'list', search],
+    queryFn: ({ signal }) =>
+      request(
+        `${base}/events?${historyParams(search)}`,
+        z.object({ items: z.array(eventSchema), ...pageFields }),
+        { signal }
+      ),
+  });
+
+/** 목록과 배정 작업이 동일한 서버 질문 상태를 참조한다. */
+export const questionsQuery = (
+  page = 1,
+  q = '',
+  status = 'all',
+  period = 'all'
+) =>
+  queryOptions({
+    queryKey: ['workspace', 'questions', 'list', page, q, status, period],
+    queryFn: ({ signal }) =>
+      request(
+        `${base}/questions?${new URLSearchParams({ page: String(page), limit: '20', q, status, period })}`,
         z.object({
           items: z.array(questionSchema),
           page: z.number(),
           limit: z.number(),
           total: z.number(),
           hasMore: z.boolean(),
+          summary: z.object({
+            all: z.number(),
+            waiting: z.number(),
+            answered: z.number(),
+            review: z.number(),
+          }),
         }),
         {
           signal,

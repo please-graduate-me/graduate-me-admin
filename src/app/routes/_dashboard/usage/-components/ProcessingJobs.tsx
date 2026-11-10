@@ -48,7 +48,13 @@ export function ProcessingJobs({
     [
       '진행 · 대기',
       allItems.filter((item) =>
-        ['pending', 'processing', 'queued'].includes(item.status.toLowerCase())
+        [
+          'pending',
+          'processing',
+          'queued',
+          'preparing',
+          'transcribing',
+        ].includes(item.status.toLowerCase())
       ).length,
     ],
   ] as const;
@@ -82,9 +88,10 @@ export function ProcessingJobs({
         onChange={change}
         placeholder='작업 ID · 자료명 검색'
         statuses={[
-          { value: 'pending', label: '대기 중' },
-          { value: 'processing', label: '처리 중' },
-          { value: 'completed', label: '완료' },
+          { value: 'queued', label: '대기 중' },
+          { value: 'preparing', label: '자료 준비 중' },
+          { value: 'transcribing', label: '전사 중' },
+          { value: 'ready', label: '완료' },
           { value: 'failed', label: '실패' },
         ]}
       />
@@ -148,6 +155,8 @@ export function ProcessingJobs({
                     pending: '대기 중',
                     queued: '대기 중',
                     processing: '처리 중',
+                    preparing: '자료 준비 중',
+                    transcribing: '전사 중',
                     failed: '실패',
                   } as Record<string, string>
                 )[status.toLowerCase()] || status}

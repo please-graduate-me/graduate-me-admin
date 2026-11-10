@@ -16,11 +16,15 @@ import { Route as DashboardEventsRouteImport } from './routes/_dashboard/events'
 import { Route as DashboardMaterialsRouteImport } from './routes/_dashboard/materials';
 import { Route as DashboardSharesRouteImport } from './routes/_dashboard/shares';
 import { Route as DashboardUsageRouteImport } from './routes/_dashboard/usage';
+import { Route as DashboardCoursesIndexRouteImport } from './routes/_dashboard/courses/index';
 import { Route as DashboardHelpersIndexRouteImport } from './routes/_dashboard/helpers/index';
+import { Route as DashboardModerationIndexRouteImport } from './routes/_dashboard/moderation/index';
 import { Route as DashboardQuestionsIndexRouteImport } from './routes/_dashboard/questions/index';
 import { Route as DashboardQuestionsQuestionIdRouteImport } from './routes/_dashboard/questions/$questionId';
 import { Route as DashboardReviewsIndexRouteImport } from './routes/_dashboard/reviews/index';
 import { Route as DashboardReviewsReviewIdRouteImport } from './routes/_dashboard/reviews/$reviewId';
+import { Route as DashboardCoursesCourseIdIndexRouteImport } from './routes/_dashboard/courses/$courseId/index';
+import { Route as DashboardCoursesCourseIdAssignmentsAssignmentIdRouteImport } from './routes/_dashboard/courses/$courseId/assignments/$assignmentId';
 
 const DashboardRouteRoute = DashboardRouteRouteImport.update({
   id: '/_dashboard',
@@ -56,11 +60,22 @@ const DashboardUsageRoute = DashboardUsageRouteImport.update({
   path: '/usage',
   getParentRoute: () => DashboardRouteRoute,
 } as any);
+const DashboardCoursesIndexRoute = DashboardCoursesIndexRouteImport.update({
+  id: '/courses/',
+  path: '/courses/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any);
 const DashboardHelpersIndexRoute = DashboardHelpersIndexRouteImport.update({
   id: '/helpers/',
   path: '/helpers/',
   getParentRoute: () => DashboardRouteRoute,
 } as any);
+const DashboardModerationIndexRoute =
+  DashboardModerationIndexRouteImport.update({
+    id: '/moderation/',
+    path: '/moderation/',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any);
 const DashboardQuestionsIndexRoute = DashboardQuestionsIndexRouteImport.update({
   id: '/questions/',
   path: '/questions/',
@@ -83,6 +98,18 @@ const DashboardReviewsReviewIdRoute =
     path: '/reviews/$reviewId',
     getParentRoute: () => DashboardRouteRoute,
   } as any);
+const DashboardCoursesCourseIdIndexRoute =
+  DashboardCoursesCourseIdIndexRouteImport.update({
+    id: '/courses/$courseId/',
+    path: '/courses/$courseId/',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any);
+const DashboardCoursesCourseIdAssignmentsAssignmentIdRoute =
+  DashboardCoursesCourseIdAssignmentsAssignmentIdRouteImport.update({
+    id: '/courses/$courseId/assignments/$assignmentId',
+    path: '/courses/$courseId/assignments/$assignmentId',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any);
 
 export interface FileRoutesByFullPath {
   '/': typeof DashboardIndexRoute;
@@ -93,9 +120,13 @@ export interface FileRoutesByFullPath {
   '/usage': typeof DashboardUsageRoute;
   '/questions/$questionId': typeof DashboardQuestionsQuestionIdRoute;
   '/reviews/$reviewId': typeof DashboardReviewsReviewIdRoute;
+  '/courses/': typeof DashboardCoursesIndexRoute;
   '/helpers/': typeof DashboardHelpersIndexRoute;
+  '/moderation/': typeof DashboardModerationIndexRoute;
   '/questions/': typeof DashboardQuestionsIndexRoute;
   '/reviews/': typeof DashboardReviewsIndexRoute;
+  '/courses/$courseId/': typeof DashboardCoursesCourseIdIndexRoute;
+  '/courses/$courseId/assignments/$assignmentId': typeof DashboardCoursesCourseIdAssignmentsAssignmentIdRoute;
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute;
@@ -106,9 +137,13 @@ export interface FileRoutesByTo {
   '/': typeof DashboardIndexRoute;
   '/questions/$questionId': typeof DashboardQuestionsQuestionIdRoute;
   '/reviews/$reviewId': typeof DashboardReviewsReviewIdRoute;
+  '/courses': typeof DashboardCoursesIndexRoute;
   '/helpers': typeof DashboardHelpersIndexRoute;
+  '/moderation': typeof DashboardModerationIndexRoute;
   '/questions': typeof DashboardQuestionsIndexRoute;
   '/reviews': typeof DashboardReviewsIndexRoute;
+  '/courses/$courseId': typeof DashboardCoursesCourseIdIndexRoute;
+  '/courses/$courseId/assignments/$assignmentId': typeof DashboardCoursesCourseIdAssignmentsAssignmentIdRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
@@ -121,9 +156,13 @@ export interface FileRoutesById {
   '/_dashboard/': typeof DashboardIndexRoute;
   '/_dashboard/questions/$questionId': typeof DashboardQuestionsQuestionIdRoute;
   '/_dashboard/reviews/$reviewId': typeof DashboardReviewsReviewIdRoute;
+  '/_dashboard/courses/': typeof DashboardCoursesIndexRoute;
   '/_dashboard/helpers/': typeof DashboardHelpersIndexRoute;
+  '/_dashboard/moderation/': typeof DashboardModerationIndexRoute;
   '/_dashboard/questions/': typeof DashboardQuestionsIndexRoute;
   '/_dashboard/reviews/': typeof DashboardReviewsIndexRoute;
+  '/_dashboard/courses/$courseId/': typeof DashboardCoursesCourseIdIndexRoute;
+  '/_dashboard/courses/$courseId/assignments/$assignmentId': typeof DashboardCoursesCourseIdAssignmentsAssignmentIdRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
@@ -136,9 +175,13 @@ export interface FileRouteTypes {
     | '/usage'
     | '/questions/$questionId'
     | '/reviews/$reviewId'
+    | '/courses/'
     | '/helpers/'
+    | '/moderation/'
     | '/questions/'
-    | '/reviews/';
+    | '/reviews/'
+    | '/courses/$courseId/'
+    | '/courses/$courseId/assignments/$assignmentId';
   fileRoutesByTo: FileRoutesByTo;
   to:
     | '/login'
@@ -149,9 +192,13 @@ export interface FileRouteTypes {
     | '/'
     | '/questions/$questionId'
     | '/reviews/$reviewId'
+    | '/courses'
     | '/helpers'
+    | '/moderation'
     | '/questions'
-    | '/reviews';
+    | '/reviews'
+    | '/courses/$courseId'
+    | '/courses/$courseId/assignments/$assignmentId';
   id:
     | '__root__'
     | '/_dashboard'
@@ -163,9 +210,13 @@ export interface FileRouteTypes {
     | '/_dashboard/'
     | '/_dashboard/questions/$questionId'
     | '/_dashboard/reviews/$reviewId'
+    | '/_dashboard/courses/'
     | '/_dashboard/helpers/'
+    | '/_dashboard/moderation/'
     | '/_dashboard/questions/'
-    | '/_dashboard/reviews/';
+    | '/_dashboard/reviews/'
+    | '/_dashboard/courses/$courseId/'
+    | '/_dashboard/courses/$courseId/assignments/$assignmentId';
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
@@ -224,11 +275,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardUsageRouteImport;
       parentRoute: typeof DashboardRouteRoute;
     };
+    '/_dashboard/courses/': {
+      id: '/_dashboard/courses/';
+      path: '/courses';
+      fullPath: '/courses/';
+      preLoaderRoute: typeof DashboardCoursesIndexRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
     '/_dashboard/helpers/': {
       id: '/_dashboard/helpers/';
       path: '/helpers';
       fullPath: '/helpers/';
       preLoaderRoute: typeof DashboardHelpersIndexRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
+    '/_dashboard/moderation/': {
+      id: '/_dashboard/moderation/';
+      path: '/moderation';
+      fullPath: '/moderation/';
+      preLoaderRoute: typeof DashboardModerationIndexRouteImport;
       parentRoute: typeof DashboardRouteRoute;
     };
     '/_dashboard/questions/': {
@@ -259,6 +324,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardReviewsReviewIdRouteImport;
       parentRoute: typeof DashboardRouteRoute;
     };
+    '/_dashboard/courses/$courseId/': {
+      id: '/_dashboard/courses/$courseId/';
+      path: '/courses/$courseId';
+      fullPath: '/courses/$courseId/';
+      preLoaderRoute: typeof DashboardCoursesCourseIdIndexRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
+    '/_dashboard/courses/$courseId/assignments/$assignmentId': {
+      id: '/_dashboard/courses/$courseId/assignments/$assignmentId';
+      path: '/courses/$courseId/assignments/$assignmentId';
+      fullPath: '/courses/$courseId/assignments/$assignmentId';
+      preLoaderRoute: typeof DashboardCoursesCourseIdAssignmentsAssignmentIdRouteImport;
+      parentRoute: typeof DashboardRouteRoute;
+    };
   }
 }
 
@@ -270,9 +349,13 @@ interface DashboardRouteRouteChildren {
   DashboardIndexRoute: typeof DashboardIndexRoute;
   DashboardQuestionsQuestionIdRoute: typeof DashboardQuestionsQuestionIdRoute;
   DashboardReviewsReviewIdRoute: typeof DashboardReviewsReviewIdRoute;
+  DashboardCoursesIndexRoute: typeof DashboardCoursesIndexRoute;
   DashboardHelpersIndexRoute: typeof DashboardHelpersIndexRoute;
+  DashboardModerationIndexRoute: typeof DashboardModerationIndexRoute;
   DashboardQuestionsIndexRoute: typeof DashboardQuestionsIndexRoute;
   DashboardReviewsIndexRoute: typeof DashboardReviewsIndexRoute;
+  DashboardCoursesCourseIdIndexRoute: typeof DashboardCoursesCourseIdIndexRoute;
+  DashboardCoursesCourseIdAssignmentsAssignmentIdRoute: typeof DashboardCoursesCourseIdAssignmentsAssignmentIdRoute;
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
@@ -283,9 +366,14 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardIndexRoute: DashboardIndexRoute,
   DashboardQuestionsQuestionIdRoute: DashboardQuestionsQuestionIdRoute,
   DashboardReviewsReviewIdRoute: DashboardReviewsReviewIdRoute,
+  DashboardCoursesIndexRoute: DashboardCoursesIndexRoute,
   DashboardHelpersIndexRoute: DashboardHelpersIndexRoute,
+  DashboardModerationIndexRoute: DashboardModerationIndexRoute,
   DashboardQuestionsIndexRoute: DashboardQuestionsIndexRoute,
   DashboardReviewsIndexRoute: DashboardReviewsIndexRoute,
+  DashboardCoursesCourseIdIndexRoute: DashboardCoursesCourseIdIndexRoute,
+  DashboardCoursesCourseIdAssignmentsAssignmentIdRoute:
+    DashboardCoursesCourseIdAssignmentsAssignmentIdRoute,
 };
 
 const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(

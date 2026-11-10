@@ -15,6 +15,10 @@ export function App() {
         locale={koKR}
         card={adminCardConfig}
         table={adminTableConfig}
+        alert={{
+          variant: 'filled',
+          styles: { root: { padding: 12, minHeight: 48 } },
+        }}
         theme={adminTheme}>
         <AntApp>
           <QueryClientProvider client={queryClient}>

@@ -1,8 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, Link, redirect } from '@tanstack/react-router';
 import {
   Alert,
+  App,
+  Button,
   Card,
+  Descriptions,
   Empty,
   Space,
   Statistic,
@@ -10,53 +13,40 @@ import {
   Tabs,
   Typography,
 } from 'antd';
-import {
-  questionsQuery,
-  reviewsQuery,
-} from '@/domains/questions/api/questions';
+import { questionsQuery } from '@/domains/questions/api/questions';
 import { formatDate, sourceLabel } from '@/domains/questions/lib/format';
 import { QuestionStatus } from '@/domains/questions/ui/QuestionStatus';
 import { PageHeading } from '../-components/PageHeading';
 import { QueryError } from '../-components/QueryError';
 import { ListFilters } from '../-components/ListFilters';
-import {
-  inPeriod,
-  parseListSearch,
-  type ListSearch,
-} from '../-components/listSearch';
+import { parseListSearch, type ListSearch } from '../-components/listSearch';
 
 /** 배정 질문 목록과 URL 기반 상태·검색 조건을 연결한다. */
 export const Route = createFileRoute('/_dashboard/questions/')({
   validateSearch: parseListSearch,
+  beforeLoad: ({ context }) => {
+    if (!context.access.role) throw redirect({ to: '/courses' });
+  },
   component: Questions,
 });
 
 function Questions() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
-  const query = useQuery(questionsQuery(search.page, search.q));
-  const reviews = useQuery(reviewsQuery);
-  const { access } = Route.useRouteContext();
-  const items = query.data?.items ?? [];
 
-  const reviewIds = new Set(
-    (reviews.data?.items ?? [])
-      .filter((item) => item.status === 'open')
-      .map((item) => item.questionId)
+  const query = useQuery(
+    questionsQuery(search.page, search.q, search.status, search.period)
   );
+
+  const { access } = Route.useRouteContext();
+  const { modal } = App.useApp();
+  const items = query.data?.items ?? [];
 
   const change = (patch: Partial<ListSearch>) =>
     void navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true });
 
-  const filtered = items.filter(
-    (item) =>
-      (search.status === 'all' ||
-        item.status === search.status ||
-        (search.status === 'review' && reviewIds.has(item.id))) &&
-      inPeriod(item.createdAt, search.period)
-  );
-
-  const waiting = items.filter((item) => item.status === 'waiting').length;
+  const summary = query.data?.summary;
+  const waiting = summary?.waiting ?? 0;
 
   return (
     <section className='flex flex-col gap-5'>
@@ -64,11 +54,62 @@ function Questions() {
         title={access.role === 'admin' ? '질문 관리' : '내 질문함'}
         description='배정된 질문과 공유된 근거를 확인하고 답변합니다.'
         action={
-          <Typography.Text type='secondary'>
-            {access.role === 'admin'
-              ? '전체 운영 범위'
-              : `배정 자료 ${access.materialIds.length}개`}
-          </Typography.Text>
+          <Button
+            onClick={() =>
+              modal.info({
+                title: '현재 담당 범위',
+                content: (
+                  <Descriptions
+                    column={1}
+                    className='mt-4!'
+                    items={[
+                      {
+                        key: 'role',
+                        label: '역할',
+                        children:
+                          access.role === 'admin'
+                            ? '운영 관리자 · 전체 운영 범위'
+                            : '학과 답변 도우미',
+                      },
+                      {
+                        key: 'languages',
+                        label: '담당 언어',
+                        children:
+                          access.languages
+                            .map((language) =>
+                              language === 'en'
+                                ? '영어'
+                                : language === 'th'
+                                  ? '태국어'
+                                  : language
+                            )
+                            .join(', ') || '미지정',
+                      },
+                      {
+                        key: 'materials',
+                        label: '배정 자료',
+                        children:
+                          access.role === 'admin'
+                            ? '운영 권한 범위'
+                            : `${access.materialIds.length}개 · 본인에게 배정된 질문만 접근`,
+                      },
+                      {
+                        key: 'permissions',
+                        label: '수행 권한',
+                        children: [
+                          '답변',
+                          ...(access.canReview ? ['검토'] : []),
+                          ...(access.canRequestEdit ? ['수정 요청'] : []),
+                          ...(access.canEdit ? ['직접 수정'] : []),
+                        ].join(' · '),
+                      },
+                    ]}
+                  />
+                ),
+              })
+            }>
+            배정 범위 확인
+          </Button>
         }
       />
       {query.error && (
@@ -77,34 +118,19 @@ function Questions() {
           retry={() => query.refetch()}
         />
       )}
-      {reviews.error && (
-        <QueryError
-          error={reviews.error}
-          retry={() => reviews.refetch()}
-        />
-      )}
       <div className='grid grid-cols-4 gap-5'>
         {[
-          ['검색된 전체 질문', query.data?.total],
-          ['현재 목록 · 답변 대기', query.data ? waiting : undefined],
-          [
-            '미처리 검토 요청',
-            reviews.data
-              ? reviews.data.items.filter((item) => item.status === 'open')
-                  .length
-              : undefined,
-          ],
-          [
-            '현재 목록 · 답변 완료',
-            query.data ? items.length - waiting : undefined,
-          ],
+          ['검색된 전체 질문', summary?.all],
+          ['답변 대기', summary?.waiting],
+          ['미처리 검토 요청 질문', summary?.review],
+          ['답변 완료', summary?.answered],
         ].map(([title, value]) => (
           <Card key={title}>
             <Statistic
               title={title}
               value={value}
               formatter={(shown) => (value === undefined ? '미확인' : shown)}
-              loading={query.isPending || reviews.isPending}
+              loading={query.isPending}
             />
           </Card>
         ))}
@@ -115,8 +141,8 @@ function Questions() {
         items={[
           { key: 'all', label: '전체' },
           { key: 'waiting', label: `답변 대기 ${waiting}` },
-          { key: 'review', label: '검토 요청' },
-          { key: 'answered', label: `답변 완료 ${items.length - waiting}` },
+          { key: 'review', label: `검토 요청 ${summary?.review ?? 0}` },
+          { key: 'answered', label: `답변 완료 ${summary?.answered ?? 0}` },
         ]}
       />
       <ListFilters
@@ -126,7 +152,7 @@ function Questions() {
       />
       <Table
         rowKey='id'
-        dataSource={filtered}
+        dataSource={items}
         loading={query.isPending}
         locale={{
           emptyText: (
@@ -194,7 +220,7 @@ function Questions() {
       />
       <Alert
         type='info'
-        title='질문 제목 검색과 페이지 이동은 전체 배정 질문에 적용합니다. 상태·기간 필터는 현재 페이지 안에서 적용합니다.'
+        title='검색·상태·기간 조건과 집계는 접근 가능한 전체 질문에 적용합니다.'
         description='담당 언어와 배정 자료의 질문만 표시합니다. 학생 전체 학습 기록에는 접근할 수 없습니다.'
       />
     </section>
