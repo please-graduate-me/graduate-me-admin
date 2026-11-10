@@ -6,18 +6,40 @@ afterEach(() => {
   vi.unstubAllEnvs();
 });
 
-describe('하위 경로 인증 복귀', () => {
+describe('관리자 배포 출처와 경로의 인증 복귀', () => {
   it.each([
-    ['signin/google', 'https://student.example.test/admin/'],
-    ['signout', 'https://student.example.test/admin/login'],
+    [
+      'https://admin.pleasegraduate.me',
+      '/',
+      'signin/google',
+      'https://admin.pleasegraduate.me/',
+    ],
+    [
+      'https://admin.pleasegraduate.me',
+      '/',
+      'signout',
+      'https://admin.pleasegraduate.me/login',
+    ],
+    [
+      'https://student.example.test',
+      '/admin/',
+      'signin/google',
+      'https://student.example.test/admin/',
+    ],
+    [
+      'https://student.example.test',
+      '/admin/',
+      'signout',
+      'https://student.example.test/admin/login',
+    ],
   ] as const)(
-    '%s 이후에도 관리자 기본 경로를 유지한다',
-    async (action, expected) => {
-      vi.stubEnv('BASE_URL', '/admin/');
+    '%s%s의 %s 인증 복귀 주소를 유지한다',
+    async (origin, base, action, expected) => {
+      vi.stubEnv('BASE_URL', base);
       const assign = vi.fn();
 
       vi.stubGlobal('window', {
-        location: { origin: 'https://student.example.test', assign },
+        location: { origin, assign },
       });
 
       const fetch = vi.fn<
@@ -26,7 +48,7 @@ describe('하위 경로 인증 복귀', () => {
         Response.json(
           path === '/api/auth/csrf'
             ? { csrfToken: 'csrf' }
-            : { url: 'https://student.example.test/next' }
+            : { url: `${origin}/next` }
         )
       );
 
@@ -42,7 +64,14 @@ describe('하위 경로 인증 복귀', () => {
         }).toString()
       );
 
-      expect(assign).toHaveBeenCalledWith('https://student.example.test/next');
+      expect(fetch.mock.calls.map(([path]) => path)).toEqual([
+        '/api/auth/csrf',
+        `/api/auth/${action}`,
+      ]);
+
+      expect(options?.method).toBe('POST');
+      expect(options?.credentials).toBe('same-origin');
+      expect(assign).toHaveBeenCalledWith(`${origin}/next`);
     }
   );
 });

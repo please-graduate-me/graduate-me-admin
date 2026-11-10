@@ -117,6 +117,27 @@ describe('관리자 라우팅', () => {
     );
   });
 
+  it('독립 관리자 출처의 루트에서도 질문 주소와 로그인 경로를 유지한다', async () => {
+    const testRouter = createTestRouter('/questions?q=문맥&page=2');
+
+    await testRouter.load();
+
+    expect(testRouter.state.matches.at(-1)?.routeId).toBe(
+      '/_dashboard/questions/'
+    );
+
+    expect(testRouter.state.matches.at(-1)?.search).toMatchObject({
+      q: '문맥',
+      page: 2,
+    });
+
+    expect(testRouter.buildLocation({ to: '/login' }).href).toBe('/login');
+
+    expect(testRouter.buildLocation({ to: '/questions' }).href).toBe(
+      '/questions'
+    );
+  });
+
   it('미로그인 사용자는 운영 데이터를 조회하기 전에 로그인으로 보낸다', async () => {
     authenticated = false;
     const testRouter = createTestRouter('/materials');

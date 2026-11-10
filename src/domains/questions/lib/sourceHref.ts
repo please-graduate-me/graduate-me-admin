@@ -1,3 +1,4 @@
+import { parsePublicOrigin } from '@/lib/config/publicOrigin';
 import type { Source } from '../model/contracts';
 
 /** 발췌의 위치·버전을 학생 뷰어에 전달하되 원본 접근 권한은 별도로 검사하게 한다. */
@@ -14,5 +15,9 @@ export function sourceHref(source: Source) {
     query.set('rect', JSON.stringify(source.rects[0]));
   if (source.kind === 'video') query.set('segment', source.segmentId);
 
-  return `${source.kind === 'pdf' ? `/materials/${encodeURIComponent(source.materialId)}` : `/learn/${encodeURIComponent(source.videoId)}`}?${query}`;
+  const path = `${source.kind === 'pdf' ? `/materials/${encodeURIComponent(source.materialId)}` : `/learn/${encodeURIComponent(source.videoId)}`}?${query}`;
+  const studentOrigin = parsePublicOrigin(import.meta.env.VITE_STUDENT_URL);
+
+  // 원본 뷰어는 학생 앱에 있으므로 관리자 독립 호스트의 라우터로 보내지 않는다.
+  return studentOrigin ? new URL(path, studentOrigin).href : path;
 }

@@ -55,7 +55,7 @@ docker compose up --build --wait
 docker compose down
 ```
 
-개발 구성과 운영 구성을 같은 3001 포트로 동시에 실행하지 않습니다. 통합 인프라의 전체 실행·홈서버 배포 등록은 별도 작업입니다.
+개발 구성과 운영 구성을 같은 3001 포트로 동시에 실행하지 않습니다. 통합 인프라의 전체 실행과 홈서버 배포는 `../graduate-me-infra`의 배포 안내를 따릅니다.
 
 ## 인증과 역할
 
@@ -75,9 +75,26 @@ docker compose down
 
 수업 관리는 전역 도우미·운영 역할을 부여하지 않습니다. Google 로그인 계정이 만든 수업 안에서 개설자·조교·수강생 역할을 판정하며, 다른 수업이나 학생 개인 학습 기록을 열람하는 권한으로 사용하지 않습니다. 학교의 공식 교수 인증·학사 시스템 연동과 구분합니다.
 
-동일 학생 도메인의 `/admin/`에 배포할 때는 이미지 빌드 인수 `ADMIN_BASE_PATH=/admin/`를 사용합니다. 프록시는 `/admin`을 `/admin/`로 리디렉션하고 `/admin/*` 접두사를 제거해 Nginx에 전달합니다. API는 동일 출처의 `/api`를 사용하므로 학생 앱과 인증 쿠키 및 Google OAuth 콜백을 공유합니다. 라우터, 로그인 복귀 주소와 정적 파일 주소는 빌드한 기본 경로를 따릅니다.
+독립 관리자 주소 `https://admin.pleasegraduate.me`에는 루트 경로로 빌드합니다. `ADMIN_BASE_PATH=/`와 학생 원문 뷰어의 공개 출처인 `VITE_STUDENT_URL=https://pleasegraduate.me`를 이미지 빌드 인수로 지정합니다. `VITE_STUDENT_URL`은 브라우저에 포함되는 공개 설정이며 비밀값을 넣지 않습니다. HTTP 또는 HTTPS 출처만 허용하고 계정 정보·하위 경로·쿼리·fragment가 있는 값은 빌드에서 거부합니다. 미설정하면 기존 동일 출처의 원문 경로를 사용합니다.
 
-브라우저에는 인증 비밀값을 넣지 않습니다. 별도 공개 도메인으로 배포할 때는 OAuth 콜백 주소와 쿠키 설정도 해당 배포 환경에 맞게 확인합니다.
+```sh
+docker build --platform linux/amd64 --build-arg ADMIN_BASE_PATH=/ --build-arg VITE_STUDENT_URL=https://pleasegraduate.me -t graduate-me-admin:$(git rev-parse --short=12 HEAD) .
+```
+
+이미지는 홈서버 밖에서 빌드하고 통합 인프라의 이미지 전달·배포 경로를 사용합니다.
+
+루트 배포에서는 `/assets/`, `/fonts/`, `/icons/`와 `/login`, `/questions` 등을 관리자 호스트에서 제공합니다. `/api/`는 같은 관리자 출처로 요청하고 프록시가 백엔드로 전달합니다. 질문·검토 화면의 원문 링크는 학생 출처로 이동하며, 학생 호스트의 로그인과 원본 접근 권한을 별도로 확인합니다. 프록시에서 `Host`, `X-Forwarded-Host`를 실제 요청 호스트로 유지해야 합니다.
+
+백엔드의 `AUTH_URL=https://pleasegraduate.me`, `ADMIN_URL=https://admin.pleasegraduate.me`를 지정하고 Google OAuth에 두 반환 주소를 모두 등록합니다.
+
+- `https://pleasegraduate.me/api/auth/callback/google`
+- `https://admin.pleasegraduate.me/api/auth/callback/google`
+
+독립 호스트는 Secure·HttpOnly·SameSite=Lax의 host-only 세션을 각각 사용합니다. 부모 도메인 쿠키를 공유하지 않으므로 학생 로그인과 관리자 로그인, 로그아웃은 각각 독립적입니다. 관리자 로그인은 관리자 루트로, 로그아웃은 관리자 `/login`으로 복귀합니다. 이 설정 안내는 실제 Google 인증 왕복 검증을 대신하지 않습니다.
+
+기존 동일 학생 도메인의 `/admin/`에 배포할 때는 이미지 빌드 인수 `ADMIN_BASE_PATH=/admin/`를 사용합니다. 프록시는 `/admin`을 `/admin/`로 리디렉션하고 `/admin/*` 접두사를 제거해 Nginx에 전달합니다. API는 동일 출처의 `/api`를 사용하므로 학생 앱과 인증 쿠키 및 Google OAuth 콜백을 공유합니다. 라우터, 로그인 복귀 주소와 정적 파일 주소는 빌드한 기본 경로를 따릅니다.
+
+브라우저에는 인증 비밀값을 넣지 않습니다. 공개 주소·쿠키·OAuth 설정은 백엔드와 프록시에서 함께 적용합니다.
 
 코드 배치는 [Architecture.md](Architecture.md), 작업 지침은 [AGENTS.md](AGENTS.md)를 따릅니다.
 

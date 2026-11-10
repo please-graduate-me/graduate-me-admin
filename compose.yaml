@@ -4,8 +4,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        ADMIN_BASE_PATH: '${ADMIN_BASE_PATH:-/}'
+        VITE_STUDENT_URL: '${VITE_STUDENT_URL:-http://localhost:3000}'
     environment:
       API_INTERNAL_URL: '${API_INTERNAL_URL:-http://api:4000}'
+      VITE_STUDENT_URL: '${VITE_STUDENT_URL:-http://localhost:3000}'
     ports:
       - '127.0.0.1:3001:3001'
     healthcheck:

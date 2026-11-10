@@ -5,7 +5,9 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 COPY . .
 ARG ADMIN_BASE_PATH=/
+ARG VITE_STUDENT_URL=
 ENV ADMIN_BASE_PATH=${ADMIN_BASE_PATH}
+ENV VITE_STUDENT_URL=${VITE_STUDENT_URL}
 RUN pnpm build
 
 FROM nginx:stable-alpine AS runtime
