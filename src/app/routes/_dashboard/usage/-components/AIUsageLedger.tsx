@@ -147,7 +147,7 @@ export function AIUsageLedger({
             type='secondary'
             className='mt-3! mb-0!'>
             토큰 미제공 {data.summary.unmeasuredRequests}건 · 실행 중{' '}
-            {data.summary.running}건 · 예약 토큰{' '}
+            {data.summary.running}건 · 요청 시 예약 토큰 합계{' '}
             {data.summary.reservedTokens.toLocaleString()}개. 토큰 합계는
             공급자가 반환한 값의 합계입니다. 공급자가 토큰을 제공하지 않는
             실행은 미제공으로 표시합니다. 비용은 해당 공급자와 모델에 설정된
