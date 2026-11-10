@@ -11,16 +11,27 @@ const parseUsageSearch = (
     view?: string;
     provider?: string;
   } & SearchSchemaInput
-) => ({
-  ...parseListSearch(raw),
-  view: raw.view === 'jobs' ? 'jobs' : 'ai',
-  provider:
-    raw.provider === 'naver' ||
-    raw.provider === 'anthropic' ||
-    raw.provider === 'gemini'
-      ? raw.provider
-      : 'all',
-});
+) => {
+  const parsed = parseListSearch(raw);
+  const view = raw.view === 'jobs' ? 'jobs' : 'ai';
+
+  const statuses =
+    view === 'jobs'
+      ? ['all', 'queued', 'preparing', 'transcribing', 'ready', 'failed']
+      : ['all', 'running', 'succeeded', 'failed'];
+
+  return {
+    ...parsed,
+    status: statuses.includes(parsed.status) ? parsed.status : 'all',
+    view,
+    provider:
+      raw.provider === 'naver' ||
+      raw.provider === 'anthropic' ||
+      raw.provider === 'gemini'
+        ? raw.provider
+        : 'all',
+  };
+};
 
 /** 실제 AI 사용량과 자료 준비 큐 이력을 구분해 운영 화면에 연결한다. */
 export const Route = createFileRoute('/_dashboard/usage')({

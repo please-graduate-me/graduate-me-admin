@@ -81,12 +81,19 @@ export const aiUsageSchema = z.object({
 
 /** 추정 단가와 실제 청구액, 조회 범위의 요청·토큰 합계를 구분한다. */
 export const aiUsageResultSchema = z.object({
+  page: z.number(),
+  limit: z.number(),
+  total: z.number(),
+  hasMore: z.boolean(),
   items: z.array(aiUsageSchema),
   currency: z.literal('USD'),
   summary: z.object({
     requests: z.number(),
     succeeded: z.number(),
     failed: z.number(),
+    running: z.number(),
+    reservedTokens: z.number(),
+    unmeasuredRequests: z.number(),
     inputTokens: z.number(),
     outputTokens: z.number(),
     estimatedCost: z.number().nullable(),
@@ -113,3 +120,18 @@ export type Helper = z.infer<typeof helperSchema>;
 export type HelperInput = Omit<Helper, 'userId' | 'name' | 'email'> & {
   email: string;
 };
+
+/** 큐 요약은 현재 페이지가 아니라 서버 검색 조건 전체를 집계한다. */
+export const processingUsageResultSchema = z.object({
+  items: z.array(usageSchema),
+  page: z.number(),
+  limit: z.number(),
+  total: z.number(),
+  hasMore: z.boolean(),
+  summary: z.object({
+    total: z.number(),
+    completed: z.number(),
+    failed: z.number(),
+    processing: z.number(),
+  }),
+});

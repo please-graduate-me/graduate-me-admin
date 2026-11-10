@@ -15,11 +15,7 @@ import { aiUsageQuery } from '@/domains/operations/api/operations';
 import { formatDate } from '@/domains/questions/lib/format';
 import { ListFilters } from '../../-components/ListFilters';
 import { QueryError } from '../../-components/QueryError';
-import {
-  inPeriod,
-  tablePage,
-  type ListSearch,
-} from '../../-components/listSearch';
+import { type ListSearch } from '../../-components/listSearch';
 
 const taskLabels: Record<string, string> = {
   explanation: '문맥 설명',
@@ -58,18 +54,18 @@ export function AIUsageLedger({
   onChange: (patch: Partial<ListSearch>) => void;
   onProvider: (provider: string) => void;
 }) {
-  const query = useQuery(aiUsageQuery);
-  const data = query.data;
-
-  const items = (data?.items ?? []).filter(
-    (item) =>
-      (provider === 'all' || item.provider === provider) &&
-      (search.status === 'all' || item.status === search.status) &&
-      inPeriod(item.createdAt, search.period) &&
-      `${item.id} ${item.model} ${item.task} ${item.sourceKey} ${item.user.name ?? ''}`
-        .toLowerCase()
-        .includes(search.q.toLowerCase())
+  const query = useQuery(
+    aiUsageQuery({
+      page: search.page,
+      q: search.q,
+      status: search.status,
+      period: search.period,
+      provider,
+    })
   );
+
+  const data = query.data;
+  const items = data?.items ?? [];
 
   const counts = [
     ['AI 요청', data?.summary.requests],
@@ -91,8 +87,8 @@ export function AIUsageLedger({
       )}
       <Alert
         type='info'
-        title='최신 100개 AI 실행의 집계입니다.'
-        description='모든 요청은 공급자·작업·사용자·근거별로 기록합니다. 표의 검색과 필터는 이 조회 범위에 적용됩니다.'
+        title='현재 검색·공급자·상태·기간 조건 전체의 집계입니다.'
+        description='요약과 비용·토큰 합계는 모든 검색 결과를 집계하며 표는 20개씩 표시합니다.'
       />
       <div className='grid grid-cols-4 gap-5'>
         {counts.map(([title, value]) => (
@@ -150,10 +146,13 @@ export function AIUsageLedger({
           <Typography.Paragraph
             type='secondary'
             className='mt-3! mb-0!'>
-            토큰 합계는 공급자가 반환한 값의 합계입니다. 공급자가 토큰을
-            제공하지 않는 실행은 미제공으로 표시합니다. 비용은 해당 공급자와
-            모델에 설정된 단가로 추정하며 단가가 없는 실행은 미집계입니다.
-            한도에 도달해도 저장된 설명·대화·문제 조회는 이용할 수 있습니다.
+            토큰 미제공 {data.summary.unmeasuredRequests}건 · 실행 중{' '}
+            {data.summary.running}건 · 예약 토큰{' '}
+            {data.summary.reservedTokens.toLocaleString()}개. 토큰 합계는
+            공급자가 반환한 값의 합계입니다. 공급자가 토큰을 제공하지 않는
+            실행은 미제공으로 표시합니다. 비용은 해당 공급자와 모델에 설정된
+            단가로 추정하며 단가가 없는 실행은 미집계입니다. 한도에 도달해도
+            저장된 설명·대화·문제 조회는 이용할 수 있습니다.
           </Typography.Paragraph>
         </Card>
       )}
@@ -183,9 +182,9 @@ export function AIUsageLedger({
         dataSource={items}
         loading={query.isPending}
         pagination={{
-          current: tablePage(search.page, items.length),
+          current: search.page,
           pageSize: 20,
-          total: items.length,
+          total: data?.total ?? 0,
           showSizeChanger: false,
           onChange: (page) => onChange({ page }),
         }}

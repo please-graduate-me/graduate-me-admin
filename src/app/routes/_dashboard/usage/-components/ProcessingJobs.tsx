@@ -5,11 +5,7 @@ import { formatDate } from '@/domains/questions/lib/format';
 import { PageHeading } from '../../-components/PageHeading';
 import { QueryError } from '../../-components/QueryError';
 import { ListFilters } from '../../-components/ListFilters';
-import {
-  inPeriod,
-  tablePage,
-  type ListSearch,
-} from '../../-components/listSearch';
+import { type ListSearch } from '../../-components/listSearch';
 
 /** 영상 준비 큐 상태를 공급자별 AI 실행 기록과 별도 표시한다. */
 export function ProcessingJobs({
@@ -19,51 +15,31 @@ export function ProcessingJobs({
   search: ListSearch;
   onChange: (patch: Partial<ListSearch>) => void;
 }) {
-  const query = useQuery(usageQuery);
-
-  const change = onChange;
-
-  const allItems = query.data?.items ?? [];
-
-  const items = allItems.filter(
-    (item) =>
-      (search.status === 'all' ||
-        item.status.toLowerCase() === search.status) &&
-      inPeriod(item.createdAt, search.period) &&
-      `${item.id} ${item.title}`.toLowerCase().includes(search.q.toLowerCase())
+  const query = useQuery(
+    usageQuery({
+      page: search.page,
+      q: search.q,
+      status: search.status,
+      period: search.period,
+    })
   );
 
+  const change = onChange;
+  const items = query.data?.items ?? [];
+  const summary = query.data?.summary;
+
   const counts = [
-    ['전체 작업', allItems.length],
-    [
-      '완료',
-      allItems.filter((item) =>
-        ['ready', 'completed', 'done'].includes(item.status.toLowerCase())
-      ).length,
-    ],
-    [
-      '실패',
-      allItems.filter((item) => item.status.toLowerCase() === 'failed').length,
-    ],
-    [
-      '진행 · 대기',
-      allItems.filter((item) =>
-        [
-          'pending',
-          'processing',
-          'queued',
-          'preparing',
-          'transcribing',
-        ].includes(item.status.toLowerCase())
-      ).length,
-    ],
+    ['전체 작업', summary?.total],
+    ['완료', summary?.completed],
+    ['실패', summary?.failed],
+    ['진행 · 대기', summary?.processing],
   ] as const;
 
   return (
     <section className='flex flex-col gap-5'>
       <PageHeading
         title='영상 자료 준비 이력'
-        description='최근 100개 영상 자료 준비 작업의 상태를 확인합니다.'
+        description='검색·상태·기간 조건 전체의 작업 수를 집계하고 20개씩 표시합니다.'
       />
       {query.error && (
         <QueryError
@@ -117,9 +93,9 @@ export function ProcessingJobs({
           ),
         }}
         pagination={{
-          current: tablePage(search.page, items.length),
+          current: search.page,
           pageSize: 20,
-          total: items.length,
+          total: query.data?.total ?? 0,
           showSizeChanger: false,
           onChange: (page) => change({ page }),
         }}

@@ -9,7 +9,7 @@ import {
   helperSchema,
   materialSchema,
   overviewSchema,
-  usageSchema,
+  processingUsageResultSchema,
   materialAccessSchema,
   aiUsageResultSchema,
   type HelperInput,
@@ -126,21 +126,40 @@ export const helpersQuery = queryOptions({
     }),
 });
 
-/** AI 호출 없이 저장된 작업 이력을 조회한다. */
-export const usageQuery = queryOptions({
-  queryKey: ['workspace', 'usage'],
-  queryFn: ({ signal }) =>
-    request(`${base}/usage`, z.object({ items: z.array(usageSchema) }), {
-      signal,
-    }),
-});
+/** 저장된 처리 이력의 검색·기간 조건을 페이지 분할 전에 서버에 전달한다. */
+export const usageQuery = (search: {
+  page: number;
+  q: string;
+  status: string;
+  period: string;
+}) =>
+  queryOptions({
+    queryKey: ['workspace', 'usage', search],
+    queryFn: ({ signal }) =>
+      request(
+        `${base}/usage?${new URLSearchParams({ ...search, page: String(search.page), limit: '20' })}`,
+        processingUsageResultSchema,
+        { signal }
+      ),
+  });
 
-/** 영상 작업 이력과 별도로 실제 AI 실행·토큰·비용 집계를 조회한다. */
-export const aiUsageQuery = queryOptions({
-  queryKey: ['workspace', 'ai-usage'],
-  queryFn: ({ signal }) =>
-    request(`${base}/ai-usage`, aiUsageResultSchema, { signal }),
-});
+/** 실제 AI 이력과 전체 조건 집계를 같은 공급자·기간·검색 조건으로 조회한다. */
+export const aiUsageQuery = (search: {
+  page: number;
+  q: string;
+  status: string;
+  period: string;
+  provider: string;
+}) =>
+  queryOptions({
+    queryKey: ['workspace', 'ai-usage', search],
+    queryFn: ({ signal }) =>
+      request(
+        `${base}/ai-usage?${new URLSearchParams({ ...search, page: String(search.page), limit: '20' })}`,
+        aiUsageResultSchema,
+        { signal }
+      ),
+  });
 
 /** 자료의 원본 접근 범위와 공유 계정을 조회한다. */
 export const materialAccessQuery = (kind: 'pdf' | 'video', id: string) =>

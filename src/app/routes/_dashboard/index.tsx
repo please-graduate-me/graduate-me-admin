@@ -4,7 +4,7 @@ import { Alert, Card, Empty, Statistic, Table, Tag } from 'antd';
 import { overviewQuery, usageQuery } from '@/domains/operations/api/operations';
 import {
   questionsQuery,
-  reviewsQuery,
+  reviewListQuery,
 } from '@/domains/questions/api/questions';
 import { formatDate } from '@/domains/questions/lib/format';
 import { communityReportsQuery } from '@/domains/operations/api/moderation';
@@ -22,9 +22,15 @@ export const Route = createFileRoute('/_dashboard/')({
 
 function Overview() {
   const summary = useQuery(overviewQuery);
-  const questions = useQuery(questionsQuery());
-  const reviews = useQuery(reviewsQuery);
-  const usage = useQuery(usageQuery);
+  const questions = useQuery(questionsQuery(1, '', 'waiting'));
+
+  const reviews = useQuery(
+    reviewListQuery({ page: 1, q: '', status: 'open', period: 'all' })
+  );
+
+  const usage = useQuery(
+    usageQuery({ page: 1, q: '', status: 'failed', period: 'all' })
+  );
 
   const community = useQuery(
     communityReportsQuery({ page: 1, q: '', status: 'open', period: 'all' })
