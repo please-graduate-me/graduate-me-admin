@@ -65,7 +65,14 @@ function Course() {
         description={`${course.language === 'en' ? '영어' : '태국어'} 수업 · ${course.role === 'teacher' ? '개설자' : course.role === 'assistant' ? '조교' : '수강생'}`}
         action={<Link to='/courses'>수업 목록</Link>}
       />
-      {course.inviteCode && (
+      {course.ownerUnavailable && (
+        <Alert
+          type='warning'
+          title='개설자가 탈퇴한 수업입니다.'
+          description='새 초대 코드 가입은 중지되었습니다. 기존 구성원과 배정 과제·제출 이력은 보존됩니다.'
+        />
+      )}
+      {course.inviteCode && !course.ownerUnavailable && (
         <Card title='수강생 초대'>
           <Typography.Paragraph>
             학생 서비스의 수업 참여 화면에서 아래 코드를 입력합니다. 코드를 아는

@@ -85,6 +85,13 @@ function AssignmentDetail() {
           </Space>
         }
       />
+      {!assignment.sourceAvailable && (
+        <Alert
+          type='warning'
+          title='현재 원본 자료에 접근할 수 없습니다.'
+          description='원본 삭제 또는 접근 권한 변경으로 새 학습·제출·힌트를 이용할 수 없습니다. 기존 제출 결과와 과제 변경 이력은 보존됩니다.'
+        />
+      )}
       <Card title='과제와 제출 정책'>
         <Descriptions
           column={3}
@@ -107,7 +114,9 @@ function AssignmentDetail() {
             {
               key: 'tasks',
               label: '범위',
-              children: `${assignment.source.tasks.length}${assignment.source.kind === 'pdf' ? '페이지' : '구절'}`,
+              children: assignment.sourceAvailable
+                ? `${assignment.source.tasks.length}${assignment.source.kind === 'pdf' ? '페이지' : '구절'}`
+                : '현재 원본 접근 불가',
             },
             {
               key: 'due',

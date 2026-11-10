@@ -10,6 +10,7 @@ export const courseSchema = z.object({
   language: z.enum(['en', 'th']),
   createdAt: z.string(),
   role: courseRoleSchema,
+  ownerUnavailable: z.boolean().default(false),
 });
 
 const taskSchema = z.object({
@@ -92,6 +93,7 @@ export const courseDetailSchema = z.object({
 
 /** 수정·제출 이력을 최신 과제와 구분해 표시한다. */
 export const assignmentSchema = z.object({
+  sourceAvailable: z.boolean().default(true),
   id: z.string(),
   courseId: z.string(),
   title: z.string(),

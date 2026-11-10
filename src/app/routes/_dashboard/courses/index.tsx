@@ -73,6 +73,13 @@ function Courses() {
                 to='/courses/$courseId'
                 params={{ courseId: item.id }}>
                 {item.title}
+                {item.ownerUnavailable && (
+                  <Tag
+                    color='warning'
+                    className='ml-2!'>
+                    개설자 탈퇴 · 신규 초대 중지
+                  </Tag>
+                )}
               </Link>
             ),
           },
