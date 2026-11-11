@@ -14,7 +14,8 @@ export type ListSearch = z.infer<typeof listSearchSchema>;
 /** 잘못된 검색 주소는 안전한 기본 목록 조건으로 해석한다. */
 export const parseListSearch = (
   search: Partial<ListSearch> & SearchSchemaInput
-) => listSearchSchema.parse(search);
+) =>
+  listSearchSchema.parse({ ...search, period: String(search.period ?? 'all') });
 
 /** 날짜 범위는 화면 목록에만 적용하고 서버 권한 판정을 대신하지 않는다. */
 export function inPeriod(createdAt: string, period: ListSearch['period']) {

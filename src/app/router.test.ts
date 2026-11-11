@@ -75,6 +75,23 @@ afterEach(() => {
 });
 
 describe('관리자 라우팅', () => {
+  it.each([
+    '/materials',
+    '/reviews',
+    '/moderation',
+    '/questions',
+    '/usage',
+    '/events',
+  ])('상세 관리 화면 %s에서도 숫자 형태의 기간을 유지한다', async (path) => {
+    const testRouter = createTestRouter(`${path}?period=7`);
+
+    await testRouter.load();
+
+    expect(testRouter.state.matches.at(-1)?.search).toMatchObject({
+      period: '7',
+    });
+  });
+
   it('권한을 확인한 운영자에게 대시보드와 같은 QueryClient를 전달한다', async () => {
     const testRouter = createTestRouter('/');
 
