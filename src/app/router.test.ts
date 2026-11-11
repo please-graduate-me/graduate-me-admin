@@ -153,7 +153,7 @@ describe('관리자 라우팅', () => {
     expect(fetch).toHaveBeenCalledTimes(1);
   });
 
-  it('도우미는 운영 전용 주소에서도 내 질문함으로 이동한다', async () => {
+  it('조교는 운영 콘솔에 진입할 수 없다', async () => {
     role = 'helper';
     const testRouter = createTestRouter('/helpers');
 
@@ -162,14 +162,14 @@ describe('관리자 라우팅', () => {
     const result = testRouter._serverResult;
 
     expect(result?.type === 'redirect' && result.redirect.options.to).toBe(
-      '/questions'
+      '/login'
     );
 
     expect(fetch).toHaveBeenCalledTimes(1);
   });
 
-  it('질문 목록의 검색 조건을 주소에서 복원한다', async () => {
-    role = 'helper';
+  it('운영자의 기존 질문 목록 검색 조건을 주소에서 복원한다', async () => {
+    role = 'admin';
 
     const testRouter = createTestRouter(
       '/questions?q=문맥&status=waiting&page=2'
@@ -190,29 +190,15 @@ describe('관리자 라우팅', () => {
     expect(match?.status).toBe('success');
   });
 
-  it('전체 운영 역할이 없는 로그인 계정도 본인 수업 관리에 진입할 수 있다', async () => {
+  it('일반 사용자 계정은 기존 수업 관리 주소에서도 운영 콘솔로 진입할 수 없다', async () => {
     role = null;
     const testRouter = createTestRouter('/courses');
-
-    await testRouter.load();
-
-    expect(testRouter.state.matches.at(-1)?.routeId).toBe(
-      '/_dashboard/courses/'
-    );
-
-    expect(testRouter.state.matches.at(-1)?.status).toBe('success');
-    expect(fetch).toHaveBeenCalledTimes(1);
-  });
-
-  it('수업 담당 계정에게 학과 도우미 질문함을 열지 않는다', async () => {
-    role = null;
-    const testRouter = createTestRouter('/questions');
 
     await testRouter.load();
     const result = testRouter._serverResult;
 
     expect(result?.type === 'redirect' && result.redirect.options.to).toBe(
-      '/courses'
+      '/login'
     );
 
     expect(fetch).toHaveBeenCalledTimes(1);

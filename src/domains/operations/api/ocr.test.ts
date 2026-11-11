@@ -58,7 +58,7 @@ it('저장 OCR 조회와 명시적 생성을 구분하고 원본 버전·영역 
     );
 
     expect(fetcher.mock.calls[0][0]).toBe(
-      '/api/materials/material/ocr?version=2&page=3'
+      '/api/admin/resources/materials/material/ocr?version=2&page=3'
     );
 
     expect(fetcher.mock.calls[0][1].method).toBeUndefined();
@@ -67,7 +67,10 @@ it('저장 OCR 조회와 명시적 생성을 구분하고 원본 버전·영역 
       await requestMaterialOcr('material', { requestId, version: 2, page: 3 })
     ).toEqual(result);
 
-    expect(fetcher.mock.calls[1][0]).toBe('/api/materials/material/ocr');
+    expect(fetcher.mock.calls[1][0]).toBe(
+      '/api/admin/resources/materials/material/ocr'
+    );
+
     expect(fetcher.mock.calls[1][1].method).toBe('POST');
 
     expect(JSON.parse(fetcher.mock.calls[1][1].body)).toEqual({

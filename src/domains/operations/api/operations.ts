@@ -64,7 +64,7 @@ export async function registerAdminMaterial(
   // 관리자의 등록도 학생과 같은 목적 확인·자료 한도 검사를 우회하지 않는다.
   if (input.kind === 'video') {
     const result = await request(
-      '/api/videos',
+      '/api/admin/resources/videos',
       z.object({ videoId: z.string() }),
       jsonBody({
         url: input.url,
@@ -79,7 +79,7 @@ export async function registerAdminMaterial(
   const { kind, ...body } = input;
 
   const result = await request(
-    '/api/materials',
+    '/api/admin/resources/materials',
     z.object({ id: z.string() }),
     jsonBody(body)
   );

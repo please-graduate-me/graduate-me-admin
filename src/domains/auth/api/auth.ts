@@ -16,37 +16,29 @@ export const accessQuery = queryOptions({
 export const authStatusQuery = queryOptions({
   queryKey: ['auth', 'status'],
   queryFn: ({ signal }) =>
-    request('/api/auth-status', z.object({ configured: z.boolean() }), {
+    request('/api/admin/auth/status', z.object({ configured: z.boolean() }), {
       signal,
     }),
   retry: false,
 });
 
-/** 로그인과 로그아웃은 서버의 CSRF 검증을 거쳐 이동한다. */
-export async function authenticate(action: 'signin/google' | 'signout') {
-  const { csrfToken } = await request(
-    '/api/auth/csrf',
-    z.object({ csrfToken: z.string() })
+/** 운영 로그인에는 Google 세션 대신 관리자 자격 증명을 전달한다. */
+export async function login(username: string, password: string) {
+  return request('/api/admin/auth/login', z.object({ ok: z.literal(true) }), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password }),
+  });
+}
+
+/** 서버 세션을 폐기한 뒤 관리자 로그인 화면으로 돌아간다. */
+export async function logout() {
+  await request('/api/admin/auth/logout', z.object({ ok: z.literal(true) }), {
+    method: 'POST',
+  });
+
+  window.location.assign(
+    new URL('login', new URL(import.meta.env.BASE_URL, window.location.origin))
+      .href
   );
-
-  // 하위 경로 배포에서도 관리자 인증 복귀가 학생 앱으로 빠지지 않게 한다.
-  const callbackUrl = new URL(
-    action === 'signout' ? 'login' : '',
-    new URL(import.meta.env.BASE_URL, window.location.origin)
-  ).href;
-
-  const { url } = await request(
-    `/api/auth/${action}`,
-    z.object({ url: z.url() }),
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'X-Auth-Return-Redirect': '1',
-      },
-      body: new URLSearchParams({ csrfToken, callbackUrl }),
-    }
-  );
-
-  window.location.assign(url);
 }

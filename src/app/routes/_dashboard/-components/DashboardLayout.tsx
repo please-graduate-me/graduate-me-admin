@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Outlet, useRouteContext } from '@tanstack/react-router';
 import { App, Button, Layout, Space, Tag, Typography } from 'antd';
-import { authenticate } from '@/domains/auth/api/auth';
+import { logout as signout } from '@/domains/auth/api/auth';
 import { Sidebar } from './Sidebar';
 
 /** 별도 admin 앱의 데스크톱 셸과 로그인된 업무 역할을 표시한다. */
@@ -11,7 +11,7 @@ export function DashboardLayout() {
   const { message } = App.useApp();
 
   const logout = useMutation({
-    mutationFn: () => authenticate('signout'),
+    mutationFn: signout,
     onSuccess: () => client.clear(),
     onError: (error) => message.error(error.message),
   });
@@ -28,12 +28,7 @@ export function DashboardLayout() {
           <Typography.Text
             type='secondary'
             style={{ fontSize: 12 }}>
-            관리 콘솔 /{' '}
-            {access.role === 'admin'
-              ? '운영 관리'
-              : access.role === 'helper'
-                ? '답변 도우미'
-                : '수업 운영'}
+            관리 콘솔 / 운영 관리
           </Typography.Text>
           <Space size={16}>
             <img
@@ -43,11 +38,7 @@ export function DashboardLayout() {
               height={20}
             />
             <Typography.Text style={{ fontSize: 12 }}>
-              {access.role === 'admin'
-                ? '운영 관리자'
-                : access.role === 'helper'
-                  ? '학과 답변 도우미'
-                  : '수업 담당 계정'}
+              {access.user.name ?? '운영 관리자'}
             </Typography.Text>
             <Tag bordered={false}>admin</Tag>
             <Button

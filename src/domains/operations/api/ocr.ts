@@ -13,7 +13,7 @@ export const materialOcrQuery = (id: string, version: number, page: number) =>
     enabled: version > 0,
     queryFn: ({ signal }) =>
       request(
-        `/api/materials/${encodeURIComponent(id)}/ocr?${new URLSearchParams({ version: String(version), page: String(page) })}`,
+        `/api/admin/resources/materials/${encodeURIComponent(id)}/ocr?${new URLSearchParams({ version: String(version), page: String(page) })}`,
         materialOcrSchema,
         { signal }
       ),
@@ -24,7 +24,7 @@ export const materialOcrQuery = (id: string, version: number, page: number) =>
 /** 한 페이지의 명시적 생성 요청에는 원본 파일이나 공급자 키를 넣지 않는다. */
 export function requestMaterialOcr(id: string, input: MaterialOcrInput) {
   return request(
-    `/api/materials/${encodeURIComponent(id)}/ocr`,
+    `/api/admin/resources/materials/${encodeURIComponent(id)}/ocr`,
     materialOcrSchema,
     jsonBody(input)
   );

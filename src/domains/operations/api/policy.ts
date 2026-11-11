@@ -6,5 +6,5 @@ import { learningPolicySchema } from '../model/policy';
 export const learningPolicyQuery = queryOptions({
   queryKey: ['learning', 'policy'],
   queryFn: ({ signal }) =>
-    request('/api/learning/policy', learningPolicySchema, { signal }),
+    request('/api/admin/resources/policy', learningPolicySchema, { signal }),
 });
