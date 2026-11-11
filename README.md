@@ -59,51 +59,17 @@ docker compose down
 
 ## 인증과 역할
 
-연결할 백엔드에 학습 작업 공간 마이그레이션과 API가 적용되어 있어야 합니다. 백엔드의 `ADMIN_URL`은 이 앱의 공개 주소(로컬 기본값 `http://localhost:3001`)로 설정합니다. 백엔드는 이 주소의 로그인 반환 위치와 변경 요청 `Origin`을 검사합니다. 프록시에서 출처를 바꾸거나 검사를 제거하지 않습니다.
+운영 콘솔은 관리자 아이디와 비밀번호만 사용합니다. 일반 사용자, 조교, 수업 담당자는 `graduate-me-frontend`를 사용합니다. 조교는 개인 답변 작업자가 아니라 커뮤니티에서 타이틀을 가진 일반 사용자입니다.
 
-운영자는 백엔드의 `ADMIN_EMAILS`로 지정합니다. 운영자가 도우미 메뉴에서 기존 Google 로그인 계정에 담당 언어·자료·검토·수정 요청 권한을 저장하면 해당 계정은 `/questions`로 진입합니다. 언어·자료가 일치하면서 본인에게 배정된 질문만 접근하며, 빈 자료 목록은 접근 권한이 없다는 뜻입니다. 운영 관리 API의 권한 검사는 서버가 담당합니다.
+백엔드의 `ADMIN_LOGIN_ID`, `ADMIN_PASSWORD_HASH`, `ADMIN_URL`을 설정합니다. 해시는 백엔드의 `pnpm admin:password`로 생성하며, 실제 비밀번호와 해시는 브라우저 환경변수나 Git에 넣지 않습니다. 설정·세션 만료·로그인 시도 제한은 백엔드 README의 인증 안내를 따릅니다. Google OAuth 설정은 사용자 웹에만 필요합니다.
 
-- `/login`: Google 로그인과 접근 권한 안내
-- `/questions`, `/questions/:id`: 배정 질문·답변·초안·내부 메모
-- `/events`: 내부 검토·변경 이력
+- `/login`: 운영 아이디·비밀번호 인증
 - `/`: 운영 현황
-- `/materials`, `/reviews`, `/helpers`, `/usage`, `/shares`: 운영자 전용 관리
-- `/moderation`: 운영자 전용 게시물 신고·노출 조치
-- `/courses`, `/courses/:id`, `/courses/:id/assignments/:assignmentId`: 로그인 계정의 수업별 역할로 관리
+- `/helpers`: 사용자 계정의 조교 타이틀 부여·회수
+- `/materials`, `/usage`, `/shares`, `/moderation`: 자료·사용량·공유·게시글 신고 관리
+- `/questions`, `/reviews`, `/events`: 기존 비공개 질문·자료 오류 신고·검토 이력
+- 기존 `/courses` 주소: 사용자 웹으로 이동 안내
 
-질문·자료·검토·변경 이력과 게시물 신고는 서버에서 검색·상태·기간 조건을 적용한 뒤 20개씩 조회합니다. 도우미 배정의 자료 선택지도 서버 페이지를 이어 조회합니다. AI 사용량과 영상 준비 이력도 서버에서 공급자·상태·기간·검색 조건을 적용한 뒤 20개씩 조회하며 요약·토큰·비용은 필터 조건 전체를 집계합니다. 서버 전체 운영 현황과 필터 조건별 집계를 구분합니다.
+조교 자격은 운영 콘솔 접근이나 자료 수정 권한을 부여하지 않습니다. 게시글과 댓글의 조교 배지, 본인이 태그된 글 모아보기는 사용자 웹에서 제공합니다. 자료 등록·OCR은 `/api/admin/resources`의 전용 인증 경로를 사용하면서 기존 소유권·자료·AI 한도를 적용합니다.
 
-수업 관리는 전역 도우미·운영 역할을 부여하지 않습니다. Google 로그인 계정이 만든 수업 안에서 개설자·조교·수강생 역할을 판정하며, 다른 수업이나 학생 개인 학습 기록을 열람하는 권한으로 사용하지 않습니다. 학교의 공식 교수 인증·학사 시스템 연동과 구분합니다.
-
-독립 관리자 주소 `https://admin.pleasegraduate.me`에는 루트 경로로 빌드합니다. `ADMIN_BASE_PATH=/`와 학생 원문 뷰어의 공개 출처인 `VITE_STUDENT_URL=https://pleasegraduate.me`를 이미지 빌드 인수로 지정합니다. `VITE_STUDENT_URL`은 브라우저에 포함되는 공개 설정이며 비밀값을 넣지 않습니다. HTTP 또는 HTTPS 출처만 허용하고 계정 정보·하위 경로·쿼리·fragment가 있는 값은 빌드에서 거부합니다. 미설정하면 기존 동일 출처의 원문 경로를 사용합니다.
-
-```sh
-docker build --platform linux/amd64 --build-arg ADMIN_BASE_PATH=/ --build-arg VITE_STUDENT_URL=https://pleasegraduate.me -t graduate-me-admin:$(git rev-parse --short=12 HEAD) .
-```
-
-이미지는 홈서버 밖에서 빌드하고 통합 인프라의 이미지 전달·배포 경로를 사용합니다.
-
-루트 배포에서는 `/assets/`, `/fonts/`, `/icons/`와 `/login`, `/questions` 등을 관리자 호스트에서 제공합니다. `/api/`는 같은 관리자 출처로 요청하고 프록시가 백엔드로 전달합니다. 질문·검토 화면의 원문 링크는 학생 출처로 이동하며, 학생 호스트의 로그인과 원본 접근 권한을 별도로 확인합니다. 프록시에서 `Host`, `X-Forwarded-Host`를 실제 요청 호스트로 유지해야 합니다.
-
-백엔드의 `AUTH_URL=https://pleasegraduate.me`, `ADMIN_URL=https://admin.pleasegraduate.me`를 지정하고 Google OAuth에 두 반환 주소를 모두 등록합니다.
-
-- `https://pleasegraduate.me/api/auth/callback/google`
-- `https://admin.pleasegraduate.me/api/auth/callback/google`
-
-독립 호스트는 Secure·HttpOnly·SameSite=Lax의 host-only 세션을 각각 사용합니다. 부모 도메인 쿠키를 공유하지 않으므로 학생 로그인과 관리자 로그인, 로그아웃은 각각 독립적입니다. 관리자 로그인은 관리자 루트로, 로그아웃은 관리자 `/login`으로 복귀합니다. 이 설정 안내는 실제 Google 인증 왕복 검증을 대신하지 않습니다.
-
-기존 동일 학생 도메인의 `/admin/`에 배포할 때는 이미지 빌드 인수 `ADMIN_BASE_PATH=/admin/`를 사용합니다. 프록시는 `/admin`을 `/admin/`로 리디렉션하고 `/admin/*` 접두사를 제거해 Nginx에 전달합니다. API는 동일 출처의 `/api`를 사용하므로 학생 앱과 인증 쿠키 및 Google OAuth 콜백을 공유합니다. 라우터, 로그인 복귀 주소와 정적 파일 주소는 빌드한 기본 경로를 따릅니다.
-
-브라우저에는 인증 비밀값을 넣지 않습니다. 공개 주소·쿠키·OAuth 설정은 백엔드와 프록시에서 함께 적용합니다.
-
-코드 배치는 [Architecture.md](Architecture.md), 작업 지침은 [AGENTS.md](AGENTS.md)를 따릅니다.
-
-## 앱 코드 배치
-
-- `src/app/routes/`: 파일 기반 라우트와 화면 조립. `-components/`는 해당 라우트와 하위 라우트의 부품·훅을 배치하며 경로 생성에서 제외합니다.
-- `src/app/routes/_dashboard/route.tsx`: 대시보드 공통 레이아웃. `_dashboard`는 URL에 포함되지 않습니다.
-- `src/app/queryClient.ts`, `router.ts`: 서버 상태 캐시와 라우터 연결.
-- `src/app/theme.ts`: Ant Design 공통 테마. 기본 UI는 `antd`에서 직접 가져오며, Tailwind는 화면 배치에 사용합니다.
-- `tsr.config.json`: 개발 플러그인과 생성 명령이 공유하는 라우트 설정. 테스트·스토리 파일도 라우트에서 제외합니다.
-
-`src/app/routeTree.gen.ts`는 생성기가 관리하며 직접 수정하거나 포맷하지 않습니다. `domains/`는 인증·질문·운영·공유 API 계약과 요청을 각각 소유합니다. 기본 UI는 Ant Design을 직접 사용하므로 자체 기본 컴포넌트 래퍼를 만들지 않습니다.
+독립 관리자 호스트는 `ADMIN_BASE_PATH=/`, `VITE_STUDENT_URL=https://pleasegraduate.me`로 빌드합니다. `/api/`는 같은 출처의 백엔드로 프록시하며, 서버가 운영 세션과 변경 요청 출처를 검증합니다.

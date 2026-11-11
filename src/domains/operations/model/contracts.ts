@@ -117,9 +117,7 @@ export type AdminMaterial = z.infer<typeof materialSchema>;
 export type Helper = z.infer<typeof helperSchema>;
 
 /** 수정 요청에는 서버가 결정하는 식별자와 표시 이름을 보내지 않는다. */
-export type HelperInput = Omit<Helper, 'userId' | 'name' | 'email'> & {
-  email: string;
-};
+export type HelperInput = { email: string; active: boolean };
 
 /** 큐 요약은 현재 페이지가 아니라 서버 검색 조건 전체를 집계한다. */
 export const processingUsageResultSchema = z.object({

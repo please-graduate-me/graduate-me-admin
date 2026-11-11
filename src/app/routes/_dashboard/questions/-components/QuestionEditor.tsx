@@ -17,7 +17,6 @@ import {
   theme,
 } from 'antd';
 import type { WorkspaceAccess } from '@/domains/auth/model/contracts';
-import { helpersQuery } from '@/domains/operations/api/operations';
 import { useQuestionMutation } from '@/domains/questions/api/questions';
 import { formatDate, sourceLabel } from '@/domains/questions/lib/format';
 import type { QuestionDetail } from '@/domains/questions/model/contracts';
@@ -53,23 +52,6 @@ export function QuestionEditor({
   const mutation = useQuestionMutation(question.id);
   const content = useQuery(contentQuery(question.id));
   const selectedTargetKey = Form.useWatch('targetKey', reviewForm);
-
-  const helpers = useQuery({
-    ...helpersQuery,
-    enabled: access.role === 'admin',
-  });
-
-  const materialId =
-    question.source.kind === 'pdf'
-      ? question.source.materialId
-      : question.source.videoId;
-
-  const candidates = (helpers.data?.items ?? []).filter(
-    (helper) =>
-      helper.active &&
-      helper.languages.includes(question.source.language) &&
-      helper.materialIds.includes(materialId)
-  );
 
   async function save(publish: boolean) {
     // 폼 검증이 끝나기 전의 연속 클릭도 중복 답변 게시로 이어지지 않게 한다.
@@ -173,48 +155,14 @@ export function QuestionEditor({
           · {formatDate(question.createdAt)}
         </Typography.Text>
       </Space>
-      {access.role === 'admin' && (
-        <Card size='small'>
-          <Space>
-            <Typography.Text>질문 배정</Typography.Text>
-            <Select
-              className='w-64!'
-              aria-label='질문 담당자'
-              allowClear
-              placeholder='도우미 선택'
-              value={question.assignee?.id}
-              loading={helpers.isPending || mutation.isPending}
-              options={candidates.map((helper) => ({
-                value: helper.userId,
-                label: helper.name || helper.email || '이름 없음',
-              }))}
-              onChange={async (assigneeId) => {
-                try {
-                  await mutation.mutateAsync({
-                    action: 'assign',
-                    assigneeId: assigneeId || null,
-                  });
-
-                  message.success('담당자를 변경했습니다.');
-                } catch (error) {
-                  if (error instanceof Error) message.error(error.message);
-                }
-              }}
-            />
-            <Typography.Text type='secondary'>
-              현재 언어와 자료가 배정된 도우미만 표시합니다.
-            </Typography.Text>
-          </Space>
-          {helpers.error && (
-            <Alert
-              type='error'
-              title={helpers.error.message}
-            />
-          )}
-        </Card>
+      {question.kind !== 'report' && (
+        <Alert
+          type='info'
+          title='기존 개인 질문은 이력으로 보존합니다. 새 학습 질문과 조교 답변은 커뮤니티에서 작성합니다.'
+        />
       )}
       <div className='grid grid-cols-[minmax(0,1.456fr)_minmax(340px,1fr)] items-start gap-6'>
-        <Card title='질문에 답변하기'>
+        <Card title='자료 신고 · 기존 질문 기록'>
           <Space
             orientation='vertical'
             size={16}
@@ -227,8 +175,7 @@ export function QuestionEditor({
             <Typography.Text
               type='secondary'
               style={{ fontSize: 12 }}>
-              질문자 {question.author.name || '이름 없음'} · 배정 도우미에게
-              공유
+              질문자 {question.author.name || '이름 없음'} · 운영자에게 공유
             </Typography.Text>
             <Typography.Paragraph
               style={{ whiteSpace: 'pre-wrap', marginBottom: 0 }}>
@@ -287,6 +234,7 @@ export function QuestionEditor({
                 <Button
                   type='primary'
                   loading={mutation.isPending}
+                  disabled={question.kind !== 'report'}
                   onClick={() => save(true)}>
                   답변 게시
                 </Button>

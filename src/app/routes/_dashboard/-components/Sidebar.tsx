@@ -16,53 +16,18 @@ export function Sidebar({ access }: { access: WorkspaceAccess }) {
       ? '/courses'
       : pathname;
 
-  const items: MenuProps['items'] = access.role
-    ? [
-        {
-          type: 'group',
-          label: '답변 도우미',
-          children: [
-            {
-              key: '/questions',
-              icon: (
-                <SidebarIcon
-                  name='message-circle'
-                  selected={selected === '/questions'}
-                />
-              ),
-              label: <Link to='/questions'>내 질문함</Link>,
-            },
-            {
-              key: '/events',
-              icon: (
-                <SidebarIcon
-                  name='clock'
-                  selected={selected === '/events'}
-                />
-              ),
-              label: <Link to='/events'>검토 이력</Link>,
-            },
-          ],
-        },
-      ]
-    : [];
-
-  items.push({
-    key: '/courses',
-    icon: (
-      <SidebarIcon
-        name='users'
-        selected={selected === '/courses'}
-      />
-    ),
-    label: <Link to='/courses'>수업 · 과제 관리</Link>,
-  });
+  const items: MenuProps['items'] = [];
 
   if (access.role === 'admin')
     items.push({
       type: 'group',
       label: '운영 관리',
       children: [
+        {
+          key: '/questions',
+          label: <Link to='/questions'>기존 질문 · 자료 신고</Link>,
+        },
+        { key: '/events', label: <Link to='/events'>운영 이력</Link> },
         {
           key: '/',
           icon: (
@@ -111,7 +76,7 @@ export function Sidebar({ access }: { access: WorkspaceAccess }) {
               selected={selected === '/helpers'}
             />
           ),
-          label: <Link to='/helpers'>도우미 · 권한</Link>,
+          label: <Link to='/helpers'>조교 자격</Link>,
         },
         {
           key: '/usage',
