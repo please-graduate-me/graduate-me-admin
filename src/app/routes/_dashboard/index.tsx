@@ -1,18 +1,33 @@
-import { useQuery } from '@tanstack/react-query';
+import { useIsFetching, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, Link, redirect } from '@tanstack/react-router';
-import { Alert, Card, Empty, Statistic, Table, Tag } from 'antd';
-import { overviewQuery, usageQuery } from '@/domains/operations/api/operations';
+import type { SearchSchemaInput } from '@tanstack/react-router';
+import { Button, Card, Segmented, Space, Statistic, Typography } from 'antd';
+import { z } from 'zod';
+import { usageQuery } from '@/domains/operations/api/operations';
 import {
   questionsQuery,
   reviewListQuery,
 } from '@/domains/questions/api/questions';
-import { formatDate } from '@/domains/questions/lib/format';
 import { communityReportsQuery } from '@/domains/operations/api/moderation';
 import { PageHeading } from './-components/PageHeading';
 import { QueryError } from './-components/QueryError';
+import { OverviewTasks } from './-components/overview/OverviewTasks';
+import { OverviewAI } from './-components/overview/OverviewAI';
+import { OverviewMaterials } from './-components/overview/OverviewMaterials';
+import { buildOverviewTasks } from './-components/overview/buildOverviewTasks';
 
-/** 운영자는 집계로, 도우미는 배정 질문함으로 진입한다. */
+const searchSchema = z.object({
+  period: z.enum(['all', '7', '30']).catch('all'),
+  kind: z
+    .enum(['all', 'community', 'review', 'question', 'failed'])
+    .catch('all'),
+});
+
+/** 운영자에게 기간별 집계와 업무·AI·자료 관리 진입점을 제공한다. */
 export const Route = createFileRoute('/_dashboard/')({
+  validateSearch: (
+    raw: Partial<z.infer<typeof searchSchema>> & SearchSchemaInput
+  ) => searchSchema.parse({ ...raw, period: String(raw.period ?? 'all') }),
   beforeLoad: ({ context }) => {
     if (context.access.role !== 'admin')
       throw redirect({ to: context.access.role ? '/questions' : '/courses' });
@@ -21,156 +36,194 @@ export const Route = createFileRoute('/_dashboard/')({
 });
 
 function Overview() {
-  const summary = useQuery(overviewQuery);
-  const questions = useQuery(questionsQuery(1, '', 'waiting'));
-
-  const reviews = useQuery(
-    reviewListQuery({ page: 1, q: '', status: 'open', period: 'all' })
-  );
-
-  const usage = useQuery(
-    usageQuery({ page: 1, q: '', status: 'failed', period: 'all' })
-  );
+  const { period, kind } = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const client = useQueryClient();
+  const fetching = useIsFetching({ queryKey: ['workspace'] });
+  const search = { page: 1, q: '', period };
+  const questions = useQuery(questionsQuery(1, '', 'waiting', period));
+  const reviews = useQuery(reviewListQuery({ ...search, status: 'open' }));
+  const usage = useQuery(usageQuery({ ...search, status: 'all' }));
+  const failed = useQuery(usageQuery({ ...search, status: 'failed' }));
 
   const community = useQuery(
-    communityReportsQuery({ page: 1, q: '', status: 'open', period: 'all' })
+    communityReportsQuery({ ...search, status: 'open' })
   );
 
+  const queries = [questions, reviews, usage, failed, community];
+  const incomplete = queries.some((query) => query.isError);
+  const loading = queries.some((query) => query.isPending);
+  const error = queries.find((query) => query.isError)?.error;
+
+  const tasks = buildOverviewTasks({
+    community: community.data?.items ?? [],
+    reviews: reviews.data?.items ?? [],
+    questions: questions.data?.items ?? [],
+    jobs: failed.data?.items ?? [],
+  }).filter((task) => kind === 'all' || task.kind === kind);
+
   const counts = [
-    ['자료 처리 중', summary.data?.processing],
-    ['미답변 질문', summary.data?.waiting],
-    ['검토 요청', summary.data?.reviews],
-    ['처리 실패', summary.data?.failed],
-  ] as const;
-
-  const tasks = [
-    ...(community.data?.items ?? []).map((item) => ({
-      id: `post-report-${item.id}`,
-      title: item.reason,
-      target: item.post.title,
-      actor: item.reporter.name,
-      status: '게시물 신고',
-      updatedAt: item.updatedAt,
-      href: '/moderation',
-    })),
-    ...(reviews.data?.items ?? [])
-      .filter((item) => item.status === 'open')
-      .map((item) => ({
-        id: `review-${item.id}`,
-        title: item.reason,
-        target: `${item.source.title} · ${item.version}`,
-        actor: item.author.name,
-        status: '검토 요청',
-        updatedAt: item.updatedAt,
-        href: `/reviews/${encodeURIComponent(item.id)}`,
-      })),
-    ...(questions.data?.items ?? [])
-      .filter((item) => item.status === 'waiting')
-      .map((item) => ({
-        id: `question-${item.id}`,
-        title: item.title,
-        target: item.source.title,
-        actor: item.assignee?.name || '미배정',
-        status: '답변 대기',
-        updatedAt: item.updatedAt,
-        href: `/questions/${encodeURIComponent(item.id)}`,
-      })),
-    ...(usage.data?.items ?? [])
-      .filter((item) => item.status.toLowerCase() === 'failed')
-      .map((item) => ({
-        id: `job-${item.id}`,
-        title: item.title,
-        target: '영상 자료 준비',
-        actor: '시스템',
-        status: '처리 실패',
-        updatedAt: item.updatedAt,
-        href: '/usage',
-      })),
-  ]
-    .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))
-    .slice(0, 10);
-
-  const error =
-    summary.error ||
-    questions.error ||
-    reviews.error ||
-    usage.error ||
-    community.error;
+    {
+      title: '미처리 게시물 신고',
+      value: community.data?.total,
+      loading: community.isPending,
+      link: (
+        <Link
+          to='/moderation'
+          search={{ status: 'open', period }}>
+          신고 처리
+        </Link>
+      ),
+    },
+    {
+      title: '검토 대기',
+      value: reviews.data?.total,
+      loading: reviews.isPending,
+      link: (
+        <Link
+          to='/reviews'
+          search={{ status: 'open', period }}>
+          검토하기
+        </Link>
+      ),
+    },
+    {
+      title: '영상 처리 실패',
+      value: usage.data?.summary.failed,
+      loading: usage.isPending,
+      link: (
+        <Link
+          to='/usage'
+          search={{ view: 'jobs', status: 'failed', period }}>
+          실패 확인
+        </Link>
+      ),
+    },
+    {
+      title: '영상 처리 중',
+      value: usage.data?.summary.processing,
+      loading: usage.isPending,
+      link: (
+        <Link
+          to='/usage'
+          search={{ view: 'jobs', period }}>
+          처리 이력
+        </Link>
+      ),
+    },
+  ];
 
   return (
     <section className='flex flex-col gap-5'>
       <PageHeading
         title='운영 현황'
-        description='답변, 자료 처리, 검토 요청을 한곳에서 확인합니다.'
+        description='처리할 업무부터 AI 실행과 새 자료까지 한곳에서 확인합니다.'
+        action={
+          <Button
+            loading={fetching > 0}
+            onClick={() =>
+              void client.invalidateQueries({ queryKey: ['workspace'] })
+            }>
+            집계 갱신
+          </Button>
+        }
       />
+      <div className='flex flex-wrap items-center justify-between gap-3'>
+        <Segmented<z.infer<typeof searchSchema>['period']>
+          aria-label='집계 기간'
+          value={period}
+          options={[
+            { value: 'all', label: '전체 기간' },
+            { value: '7', label: '최근 7일' },
+            { value: '30', label: '최근 30일' },
+          ]}
+          onChange={(value) =>
+            void navigate({
+              search: (previous) => ({ ...previous, period: value }),
+              replace: true,
+            })
+          }
+        />
+        <Typography.Text type='secondary'>
+          선택 기간에 생성된 기록의 현재 상태를 집계합니다.
+        </Typography.Text>
+      </div>
       {error && (
         <QueryError
           error={error}
           retry={() => {
-            summary.refetch();
-            questions.refetch();
-            reviews.refetch();
-            usage.refetch();
-            community.refetch();
+            queries
+              .filter((query) => query.isError)
+              .forEach((query) => void query.refetch());
           }}
         />
       )}
-      <div className='grid grid-cols-4 gap-5'>
-        {counts.map(([title, value]) => (
+      <div className='grid grid-cols-2 gap-5 xl:grid-cols-4'>
+        {counts.map(({ title, value, loading: pending, link }) => (
           <Card key={title}>
             <Statistic
               title={title}
               value={value}
+              loading={pending}
               formatter={(shown) => (value === undefined ? '미확인' : shown)}
-              loading={summary.isPending}
             />
+            <div className='mt-3'>{link}</div>
           </Card>
         ))}
       </div>
-      <Table
-        rowKey='id'
-        dataSource={tasks}
-        loading={questions.isPending || reviews.isPending || usage.isPending}
-        locale={{
-          emptyText: (
-            <Empty
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description='우선 확인할 업무가 없습니다.'
-            />
-          ),
-        }}
-        pagination={false}
-        columns={[
-          {
-            title: '우선 확인할 업무',
-            key: 'title',
-            width: '36%',
-            render: (_, item) => <Link to={item.href}>{item.title}</Link>,
-          },
-          { title: '대상', dataIndex: 'target' },
-          { title: '담당자', dataIndex: 'actor' },
-          {
-            title: '상태',
-            dataIndex: 'status',
-            render: (value) => (
-              <Tag
-                bordered={false}
-                color={value === '처리 실패' ? 'red' : 'orange'}>
-                {value}
-              </Tag>
-            ),
-          },
-          {
-            title: '최근 업데이트',
-            dataIndex: 'updatedAt',
-            render: formatDate,
-          },
-        ]}
+      <div className='flex flex-wrap items-center justify-between gap-3'>
+        <Segmented<z.infer<typeof searchSchema>['kind']>
+          aria-label='업무 종류'
+          value={kind}
+          options={[
+            { value: 'all', label: '전체 업무' },
+            { value: 'failed', label: '처리 실패' },
+            { value: 'community', label: '게시물 신고' },
+            { value: 'review', label: '검토 요청' },
+            { value: 'question', label: '미답변 기록' },
+          ]}
+          onChange={(value) =>
+            void navigate({
+              search: (previous) => ({ ...previous, kind: value }),
+              replace: true,
+            })
+          }
+        />
+        <Link
+          to='/questions'
+          search={{ period, status: 'waiting' }}>
+          미답변 기록 {questions.data?.total ?? '미확인'}건 보기
+        </Link>
+      </div>
+      <OverviewTasks
+        key={`${period}-${kind}`}
+        tasks={tasks}
+        loading={loading}
+        incomplete={incomplete}
+        period={period}
       />
-      <Alert
-        type='info'
-        title='현재 저장된 질문·검토 요청·작업의 상태를 표시합니다. 비용과 학습 시간을 임의로 추정하지 않습니다.'
-      />
+      <div className='grid grid-cols-1 items-start gap-5 2xl:grid-cols-[1fr_1.5fr]'>
+        <OverviewAI period={period} />
+        <OverviewMaterials period={period} />
+      </div>
+      <Card title='다른 운영 업무'>
+        <Space
+          size='large'
+          wrap>
+          <Link
+            to='/materials'
+            search={{ period }}>
+            자료 등록 · 공개 범위 관리
+          </Link>
+          <Link to='/helpers'>조교 자격 관리</Link>
+          <Link to='/shares'>공유 링크 관리</Link>
+          <Link
+            to='/events'
+            search={{ period }}>
+            운영 이력 확인
+          </Link>
+        </Space>
+      </Card>
     </section>
   );
 }

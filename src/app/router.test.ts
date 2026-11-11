@@ -1,4 +1,11 @@
 import { createElement } from 'react';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { communityReportsQuery } from '@/domains/operations/api/moderation';
+import { usageQuery } from '@/domains/operations/api/operations';
+import {
+  reviewListQuery,
+  questionsQuery,
+} from '@/domains/questions/api/questions';
 import { renderToString } from 'react-dom/server';
 import {
   createMemoryHistory,
@@ -90,6 +97,100 @@ describe('관리자 라우팅', () => {
     expect(testRouter.state.matches.at(-1)?.search).toMatchObject({
       period: '7',
     });
+  });
+
+  it('운영 현황의 기간과 업무 종류를 주소에서 복원한다', async () => {
+    const testRouter = createTestRouter('/?period=7&kind=failed');
+
+    await testRouter.load();
+
+    expect(testRouter.state.matches.at(-1)?.search).toEqual({
+      period: '7',
+      kind: 'failed',
+    });
+  });
+
+  it('잘못된 운영 현황 조건은 전체 기간과 전체 업무로 복원한다', async () => {
+    const testRouter = createTestRouter('/?period=unknown&kind=unknown');
+
+    await testRouter.load();
+
+    expect(testRouter.state.matches.at(-1)?.search).toEqual({
+      period: 'all',
+      kind: 'all',
+    });
+  });
+
+  it('기간 전체 집계를 표시하고 실패 이력 링크에 기간과 상태를 유지한다', async () => {
+    const search = { page: 1, q: '', period: '7' };
+    const page = { items: [], total: 42, limit: 20, page: 1, hasMore: true };
+
+    queryClient.setQueryData(
+      communityReportsQuery({ ...search, status: 'open' }).queryKey,
+      page
+    );
+
+    queryClient.setQueryData(
+      reviewListQuery({ ...search, status: 'open' }).queryKey,
+      page
+    );
+
+    queryClient.setQueryData(questionsQuery(1, '', 'waiting', '7').queryKey, {
+      ...page,
+      summary: { all: 42, waiting: 42, answered: 0, review: 0 },
+    });
+
+    queryClient.setQueryData(
+      usageQuery({ ...search, status: 'all' }).queryKey,
+      {
+        ...page,
+        summary: { total: 42, completed: 30, failed: 5, processing: 7 },
+      }
+    );
+
+    queryClient.setQueryData(
+      usageQuery({ ...search, status: 'failed' }).queryKey,
+      { ...page, summary: { total: 5, completed: 0, failed: 5, processing: 0 } }
+    );
+
+    const testRouter = createTestRouter('/?period=7&kind=failed');
+
+    await testRouter.load();
+
+    const html = renderToString(
+      createElement(
+        QueryClientProvider,
+        { client: queryClient },
+        createElement(RouterProvider, { router: testRouter })
+      )
+    );
+
+    expect(html).toContain('미처리 게시물 신고');
+    expect(html).toContain('42');
+    expect(html).toContain('영상 처리 실패');
+    expect(html).toContain('view=jobs');
+    expect(html).toContain('status=failed');
+
+    const links = [...html.matchAll(/href="([^"]+)"/g)].map(
+      (match) =>
+        new URL(match[1].replaceAll('&amp;', '&'), 'https://admin.example.test')
+    );
+
+    const failureLink = links.find(
+      (link) =>
+        link.pathname === '/usage' &&
+        link.searchParams.get('status') === 'failed'
+    );
+
+    expect(failureLink).toBeDefined();
+
+    expect(String(JSON.parse(failureLink!.searchParams.get('period')!))).toBe(
+      '7'
+    );
+
+    expect(html).toContain('AI 실행 요약');
+    expect(html).toContain('최근 등록 자료');
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 
   it('권한을 확인한 운영자에게 대시보드와 같은 QueryClient를 전달한다', async () => {
