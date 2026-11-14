@@ -121,4 +121,5 @@ UI는 먼저 아래 Astryx 사용 규칙에 따라 기존 컴포넌트로 충족
 
 - `FormField`는 UI 없는 `rc-field-form`의 기존 비동기·필드 의존 검증을 Astryx 입력의 label·description·status와 연결한다. 기본 입력 부품은 직접 import한다.
 - `DataTable`은 여러 운영 목록의 서버·로컬 페이지 처리, 열별 업무 표시, 오류 상세 펼침을 Astryx Table·Pagination·Button으로 조합한다.
+- `RouterLink`는 Astryx Link에 TanStack Router의 타입·검색 조건·사전 로딩을 연결한다.
 - `Metric`은 운영 집계의 로딩·미확인 값·단위를 Astryx Text·Heading·Skeleton으로 표시한다.

@@ -1,3 +1,4 @@
+import { RouterLink as Link } from '@/components/ui/RouterLink';
 import { EmptyState } from '@astryxdesign/core/EmptyState';
 import { Spinner } from '@astryxdesign/core/Spinner';
 import { Button } from '@astryxdesign/core/Button';
@@ -8,7 +9,7 @@ import { Heading } from '@astryxdesign/core/Heading';
 import { Card } from '@astryxdesign/core/Card';
 import { Banner } from '@astryxdesign/core/Banner';
 import { useQuery } from '@tanstack/react-query';
-import { createFileRoute, Link, redirect } from '@tanstack/react-router';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 import { reviewQuery } from '@/domains/questions/api/questions';
 import { formatDate } from '@/domains/questions/lib/format';
 import { SourceExcerpt } from '@/domains/questions/ui/SourceExcerpt';
@@ -87,7 +88,7 @@ function ReviewDetail() {
           {review.version} · {formatDate(review.createdAt)}
         </Text>
       </Stack>
-      <div className='grid grid-cols-[minmax(0,1.456fr)_minmax(340px,1fr)] items-start gap-6'>
+      <div className='grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1.456fr)_minmax(340px,1fr)]'>
         <Card padding={5}>
           <Heading level={3}>{'신고와 근거'}</Heading>
           <Stack

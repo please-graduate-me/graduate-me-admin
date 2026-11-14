@@ -1,7 +1,6 @@
 import { cloneElement, useId, type ReactElement, type ReactNode } from 'react';
 import { Field as StoredField } from 'rc-field-form';
 import type { FieldProps } from 'rc-field-form/es/Field';
-import { Field } from '@astryxdesign/core/Field';
 
 type Props = Omit<FieldProps, 'children'> & {
   label?: string;
@@ -14,20 +13,24 @@ export function FormField({ label, description, children, ...props }: Props) {
   const id = useId();
 
   if (!props.name)
-    return (
-      <Field
-        label={label ?? '선택'}
-        inputID={id}
-        description={typeof description === 'string' ? description : undefined}>
-        {cloneElement(children, { id })}
-      </Field>
-    );
+    return cloneElement(children, {
+      id,
+      label: label ?? children.props.label,
+      isLabelHidden: !label && children.props.isLabelHidden,
+      description,
+    });
 
   return (
     <StoredField {...props}>
       {(control, meta) =>
         cloneElement(children, {
           ...control,
+          onChange: (...args: unknown[]) => {
+            control.onChange(...args);
+            // 값 수집과 화면의 연관 필드 갱신을 함께 보존한다.
+            if (typeof children.props.onChange === 'function')
+              children.props.onChange(...args);
+          },
           id,
           label: label ?? children.props.label,
           isLabelHidden: !label && children.props.isLabelHidden,

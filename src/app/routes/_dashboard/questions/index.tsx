@@ -1,3 +1,4 @@
+import { RouterLink as Link } from '@/components/ui/RouterLink';
 import { MetadataListItem } from '@astryxdesign/core/MetadataList';
 import { MetadataList } from '@astryxdesign/core/MetadataList';
 import { useImperativeDialog, DialogHeader } from '@astryxdesign/core/Dialog';
@@ -12,7 +13,7 @@ import { Banner } from '@astryxdesign/core/Banner';
 import { Metric } from '@/components/ui/Metric';
 import { DataTable } from '@/components/ui/DataTable';
 import { useQuery } from '@tanstack/react-query';
-import { createFileRoute, Link, redirect } from '@tanstack/react-router';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 import { questionsQuery } from '@/domains/questions/api/questions';
 import { formatDate, sourceLabel } from '@/domains/questions/lib/format';
 import { QuestionStatus } from '@/domains/questions/ui/QuestionStatus';
@@ -128,7 +129,7 @@ function Questions() {
           retry={() => query.refetch()}
         />
       )}
-      <div className='grid grid-cols-4 gap-5'>
+      <div className='grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4'>
         {[
           ['검색된 전체 질문', summary?.all],
           ['답변 대기', summary?.waiting],

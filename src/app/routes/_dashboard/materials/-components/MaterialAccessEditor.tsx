@@ -1,4 +1,5 @@
-import { TextArea } from '@astryxdesign/core/TextArea';
+import { Tokenizer } from '@astryxdesign/core/Tokenizer';
+import type { SearchableItem } from '@astryxdesign/core/Typeahead';
 import { useToast } from '@astryxdesign/core/Toast';
 import { Text } from '@astryxdesign/core/Text';
 import { Banner } from '@astryxdesign/core/Banner';
@@ -111,6 +112,7 @@ export function MaterialAccessEditor({
           disabled={!canPublish || mutation.isPending}
           className='m-0 min-w-0 border-0 p-0'>
           <Form
+            className='flex flex-col gap-4'
             key={`${material.id}:${query.data.version}`}
             form={form}
             initialValues={{
@@ -149,11 +151,11 @@ export function MaterialAccessEditor({
             {visibility === 'accounts' && (
               <FormField
                 name='allowedUserIds'
-                normalize={(text: string) =>
-                  text.split(/[\s,]+/).filter(Boolean)
+                normalize={(items: SearchableItem[]) =>
+                  items.map((item) => item.id)
                 }
                 getValueProps={(values: string[] = []) => ({
-                  value: values.join('\n'),
+                  value: values.map((value) => ({ id: value, label: value })),
                 })}
                 label='열람 허용 계정'
                 description='허용할 계정 식별자를 입력해 주세요. 도우미의 담당 자료 배정과는 별개입니다.'
@@ -165,10 +167,13 @@ export function MaterialAccessEditor({
                     message: '하나 이상의 계정을 지정해 주세요.',
                   },
                 ]}>
-                <TextArea
+                <Tokenizer
                   label='열람 허용 계정'
-                  value=''
-                  placeholder='계정 식별자를 한 줄에 하나씩 입력'
+                  value={[]}
+                  onChange={() => {}}
+                  hasCreate
+                  searchSource={{ search: () => [], bootstrap: () => [] }}
+                  placeholder='계정 식별자를 입력하고 Enter로 추가'
                 />
               </FormField>
             )}

@@ -1,3 +1,4 @@
+import { RouterLink as Link } from '@/components/ui/RouterLink';
 import { Button } from '@astryxdesign/core/Button';
 import { SegmentedControlItem } from '@astryxdesign/core/SegmentedControl';
 import { SegmentedControl } from '@astryxdesign/core/SegmentedControl';
@@ -7,7 +8,7 @@ import { Stack } from '@astryxdesign/core/Stack';
 import { Heading } from '@astryxdesign/core/Heading';
 import { Metric } from '@/components/ui/Metric';
 import { useIsFetching, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createFileRoute, Link, redirect } from '@tanstack/react-router';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 import type { SearchSchemaInput } from '@tanstack/react-router';
 import { z } from 'zod';
 import { usageQuery } from '@/domains/operations/api/operations';
@@ -176,7 +177,7 @@ function Overview() {
           }}
         />
       )}
-      <div className='grid grid-cols-2 gap-5 xl:grid-cols-4'>
+      <div className='grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4'>
         {counts.map(({ title, value, loading: pending, link }) => (
           <Card
             key={title}

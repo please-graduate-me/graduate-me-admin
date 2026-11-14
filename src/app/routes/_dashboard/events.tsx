@@ -1,3 +1,4 @@
+import { RouterLink as Link } from '@/components/ui/RouterLink';
 import { EmptyState } from '@astryxdesign/core/EmptyState';
 import { Text } from '@astryxdesign/core/Text';
 import { Badge } from '@astryxdesign/core/Badge';
@@ -6,7 +7,7 @@ import { Heading } from '@astryxdesign/core/Heading';
 import { Card } from '@astryxdesign/core/Card';
 import { DataTable } from '@/components/ui/DataTable';
 import { useQuery } from '@tanstack/react-query';
-import { createFileRoute, Link, redirect } from '@tanstack/react-router';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 import { eventListQuery } from '@/domains/questions/api/questions';
 import { eventLabels } from '@/domains/questions/config/events';
 import { formatDate } from '@/domains/questions/lib/format';

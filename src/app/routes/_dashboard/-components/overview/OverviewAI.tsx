@@ -1,10 +1,10 @@
+import { RouterLink as Link } from '@/components/ui/RouterLink';
 import { ProgressBar } from '@astryxdesign/core/ProgressBar';
 import { Text } from '@astryxdesign/core/Text';
 import { Heading } from '@astryxdesign/core/Heading';
 import { Card } from '@astryxdesign/core/Card';
 import { Metric } from '@/components/ui/Metric';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from '@tanstack/react-router';
 import { aiUsageQuery } from '@/domains/operations/api/operations';
 import { QueryError } from '../QueryError';
 
@@ -33,7 +33,7 @@ export function OverviewAI({ period }: { period: 'all' | '7' | '30' }) {
           retry={() => query.refetch()}
         />
       )}
-      <div className='grid grid-cols-2 gap-5'>
+      <div className='grid grid-cols-1 gap-5 md:grid-cols-2'>
         {[
           ['전체 요청', summary?.requests],
           ['실행 중', summary?.running],

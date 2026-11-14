@@ -91,7 +91,7 @@ export function AIUsageLedger({
         title='현재 검색·공급자·상태·기간 조건 전체의 집계입니다.'
         description='요약과 비용·토큰 합계는 모든 검색 결과를 집계하며 표는 20개씩 표시합니다.'
       />
-      <div className='grid grid-cols-4 gap-5'>
+      <div className='grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4'>
         {counts.map(([title, value]) => (
           <Card
             key={title}

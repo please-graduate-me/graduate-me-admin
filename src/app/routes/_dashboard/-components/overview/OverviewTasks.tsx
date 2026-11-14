@@ -1,10 +1,10 @@
+import { RouterLink as Link } from '@/components/ui/RouterLink';
 import { Banner } from '@astryxdesign/core/Banner';
 import { EmptyState } from '@astryxdesign/core/EmptyState';
 import { Badge } from '@astryxdesign/core/Badge';
 import { Heading } from '@astryxdesign/core/Heading';
 import { Card } from '@astryxdesign/core/Card';
 import { DataTable } from '@/components/ui/DataTable';
-import { Link } from '@tanstack/react-router';
 import { formatDate } from '@/domains/questions/lib/format';
 import type { OverviewTask } from './buildOverviewTasks';
 

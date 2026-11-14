@@ -168,13 +168,14 @@ export function ContentEditor({
           disabled={mutation.isPending}
           className='m-0 min-w-0 border-0 p-0'>
           <Form
+            className='flex flex-col gap-4'
             form={form}
             initialValues={contentEditorValues(content)}
             onValuesChange={(changed) => {
               if (Object.keys(changed).some((key) => key !== 'reason'))
                 setPayloadDirty(true);
             }}>
-            <div className='grid grid-cols-[minmax(0,1fr)_340px] items-start gap-6'>
+            <div className='grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_340px]'>
               <div>
                 <fieldset disabled={!editable || mutation.isPending}>
                   <ContentPayloadFields

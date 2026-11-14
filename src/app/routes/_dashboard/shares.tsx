@@ -1,3 +1,4 @@
+import { Text } from '@astryxdesign/core/Text';
 import { useImperativeAlertDialog } from '@astryxdesign/core/AlertDialog';
 import { useToast } from '@astryxdesign/core/Toast';
 import { Card } from '@astryxdesign/core/Card';
@@ -64,7 +65,7 @@ function Shares() {
           retry={() => query.refetch()}
         />
       )}
-      <div className='grid grid-cols-3 gap-5'>
+      <div className='grid grid-cols-1 gap-5 lg:grid-cols-3'>
         {[
           ['전체 공유 링크', query.data?.summary.links],
           ['로그인 방문 세션', query.data?.summary.visits],
@@ -93,7 +94,7 @@ function Shares() {
         type='search'
         onChange={(event) =>
           void navigate({
-            search: (prev) => ({ ...prev, q: event, page: 1 }),
+            search: (prev) => ({ ...prev, q: event.slice(0, 100), page: 1 }),
             replace: true,
           })
         }
@@ -171,7 +172,7 @@ function Shares() {
           variant='secondary'
           label='이전'
         />
-        <span>{search.page} 페이지</span>
+        <Text>{search.page} 페이지</Text>
         <Button
           isDisabled={!query.data?.hasMore || query.isPending}
           onClick={() =>

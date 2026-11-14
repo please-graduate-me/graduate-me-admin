@@ -1,3 +1,4 @@
+import { RouterLink as Link } from '@/components/ui/RouterLink';
 import { Text } from '@astryxdesign/core/Text';
 import { EmptyState } from '@astryxdesign/core/EmptyState';
 import { Badge } from '@astryxdesign/core/Badge';
@@ -5,7 +6,6 @@ import { Heading } from '@astryxdesign/core/Heading';
 import { Card } from '@astryxdesign/core/Card';
 import { DataTable } from '@/components/ui/DataTable';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from '@tanstack/react-router';
 import { materialListQuery } from '@/domains/operations/api/operations';
 import { formatDate } from '@/domains/questions/lib/format';
 import { QueryError } from '../QueryError';

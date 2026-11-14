@@ -56,6 +56,7 @@ export function HelperEditor({
         className='mb-5!'
       />
       <Form
+        className='flex flex-col gap-4'
         form={form}
         initialValues={helper ?? { email: '', active: true }}>
         <FormField

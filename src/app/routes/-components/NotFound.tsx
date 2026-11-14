@@ -1,5 +1,5 @@
+import { RouterLink as Link } from '@/components/ui/RouterLink';
 import { EmptyState } from '@astryxdesign/core/EmptyState';
-import { Link } from '@tanstack/react-router';
 
 /** 등록되지 않은 경로에서 대시보드로 돌아갈 수 있게 한다. */
 export function NotFound() {

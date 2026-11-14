@@ -197,7 +197,7 @@ export function QuestionEditor({
           title='기존 개인 질문은 이력으로 보존합니다. 새 학습 질문과 조교 답변은 커뮤니티에서 작성합니다.'
         />
       )}
-      <div className='grid grid-cols-[minmax(0,1.456fr)_minmax(340px,1fr)] items-start gap-6'>
+      <div className='grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1.456fr)_minmax(340px,1fr)]'>
         <Card padding={5}>
           <Heading level={3}>{'자료 신고 · 기존 질문 기록'}</Heading>
           <Stack
@@ -220,12 +220,12 @@ export function QuestionEditor({
               {question.body}
             </Text>
             <Form
+              className='flex flex-col gap-4'
               form={form}
               initialValues={{
                 draft: question.draft,
                 internalNote: question.internalNote,
-              }}
-              className='w-full'>
+              }}>
               <FormField
                 name='draft'
                 label='학생에게 공개되는 답변'
@@ -463,6 +463,7 @@ export function QuestionEditor({
           className='mb-5!'
         />
         <Form
+          className='flex flex-col gap-4'
           form={reviewForm}
           initialValues={{
             scope: 'source',

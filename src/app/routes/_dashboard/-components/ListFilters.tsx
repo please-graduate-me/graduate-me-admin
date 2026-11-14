@@ -38,7 +38,9 @@ export function ListFilters({
       <TextInput
         key={value.q}
         htmlName='q'
-        onChange={(draft) => setQuery({ source: value.q, draft })}
+        onChange={(draft) =>
+          setQuery({ source: value.q, draft: draft.slice(0, 100) })
+        }
         placeholder={placeholder}
         aria-label={placeholder}
         containerClassName='w-80!'

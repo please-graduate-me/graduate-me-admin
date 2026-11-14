@@ -40,7 +40,7 @@ export function CommunityReportEditor({
         title={'게시물 신고 검토'}
         onOpenChange={onClose}
       />
-      <div className='grid grid-cols-[minmax(0,1fr)_320px] items-start gap-6'>
+      <div className='grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_320px]'>
         <div className='flex flex-col gap-4'>
           <Banner
             status='warning'
@@ -60,6 +60,7 @@ export function CommunityReportEditor({
           </Text>
         </div>
         <Form
+          className='flex flex-col gap-4'
           form={form}
           initialValues={{
             status: report.status === 'dismissed' ? 'dismissed' : 'resolved',

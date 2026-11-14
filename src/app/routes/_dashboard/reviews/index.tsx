@@ -1,3 +1,4 @@
+import { RouterLink as Link } from '@/components/ui/RouterLink';
 import { SegmentedControlItem } from '@astryxdesign/core/SegmentedControl';
 import { SegmentedControl } from '@astryxdesign/core/SegmentedControl';
 import { EmptyState } from '@astryxdesign/core/EmptyState';
@@ -5,7 +6,7 @@ import { Badge } from '@astryxdesign/core/Badge';
 import { Banner } from '@astryxdesign/core/Banner';
 import { DataTable } from '@/components/ui/DataTable';
 import { useQuery } from '@tanstack/react-query';
-import { createFileRoute, Link, redirect } from '@tanstack/react-router';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 import type { SearchSchemaInput } from '@tanstack/react-router';
 import { reviewListQuery } from '@/domains/questions/api/questions';
 import { formatDate, sourceLabel } from '@/domains/questions/lib/format';

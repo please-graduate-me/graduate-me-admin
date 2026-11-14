@@ -47,6 +47,7 @@ export function ReviewDecision({ review }: { review: ReviewRequest }) {
         disabled={review.status !== 'open' || mutation.isPending}
         className='m-0 min-w-0 border-0 p-0'>
         <Form
+          className='flex flex-col gap-4'
           form={form}
           initialValues={{
             status: review.status === 'dismissed' ? 'dismissed' : 'resolved',

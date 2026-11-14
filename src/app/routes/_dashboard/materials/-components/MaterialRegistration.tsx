@@ -144,6 +144,7 @@ export function MaterialRegistration({ onClose }: { onClose: () => void }) {
         disabled={busy}
         className='m-0 min-w-0 border-0 p-0'>
         <Form
+          className='flex flex-col gap-4'
           form={form}
           initialValues={{ language: 'en' }}>
           <FormField label='자료 종류'>

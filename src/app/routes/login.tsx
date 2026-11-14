@@ -40,7 +40,7 @@ function Login() {
   return (
     <main className='flex min-h-dvh items-center justify-center p-10'>
       <Card
-        className='w-[480px]'
+        className='w-full max-w-[480px]'
         padding={5}>
         <Text color='secondary'>graduate me / admin</Text>
         <Heading level={2}>운영자 로그인</Heading>
@@ -64,11 +64,16 @@ function Login() {
             className='mb-4!'
           />
         )}
-        <Form onFinish={(values) => signin.mutate(values)}>
+        <Form
+          className='flex flex-col gap-4'
+          onFinish={(values) => signin.mutate(values)}>
           <FormField
             name='username'
             label='관리자 아이디'
-            rules={[{ required: true, message: '아이디를 입력해 주세요.' }]}>
+            rules={[
+              { required: true, message: '아이디를 입력해 주세요.' },
+              { max: 128, message: '아이디는 128자 이내로 입력해 주세요.' },
+            ]}>
             <TextInput
               autoComplete='username'
               isDisabled={signin.isPending}
@@ -80,7 +85,10 @@ function Login() {
           <FormField
             name='password'
             label='비밀번호'
-            rules={[{ required: true, message: '비밀번호를 입력해 주세요.' }]}>
+            rules={[
+              { required: true, message: '비밀번호를 입력해 주세요.' },
+              { max: 256, message: '비밀번호는 256자 이내로 입력해 주세요.' },
+            ]}>
             <TextInput
               autoComplete='current-password'
               isDisabled={signin.isPending}
