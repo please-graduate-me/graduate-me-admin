@@ -315,13 +315,10 @@ export function QuestionEditor({
                 답변 게시와 설명·문제 검토 요청은 별도로 처리합니다.
               </Text>
               {question.reviews.map((review) => (
-                <div
+                <Card
                   key={review.id}
-                  style={{
-                    padding: 12,
-                    background: 'var(--color-background-body)',
-                    borderRadius: 8,
-                  }}>
+                  variant='muted'
+                  padding={3}>
                   <Stack
                     direction='horizontal'
                     gap={2}>
@@ -363,7 +360,7 @@ export function QuestionEditor({
                       {review.resolution}
                     </Text>
                   )}
-                </div>
+                </Card>
               ))}
               <Button
                 isDisabled={!access.canReview || !access.canRequestEdit}

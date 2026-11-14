@@ -55,9 +55,10 @@ export function QuestionContentPanel({
           <EmptyState title='공유된 설명·문제·영상 전사가 없습니다.' />
         )}
         {query.data?.items.map((content) => (
-          <div
+          <Card
             key={`${content.kind}:${content.id}`}
-            className='flex items-start justify-between gap-4 rounded-lg border border-(--ant-color-border) p-4'>
+            padding={4}
+            className='flex items-start justify-between gap-4'>
             <Stack
               direction='vertical'
               gap={2}>
@@ -120,7 +121,7 @@ export function QuestionContentPanel({
               variant='secondary'
               label='내용 · 버전 검토'
             />
-          </div>
+          </Card>
         ))}
       </div>
       {selected && (

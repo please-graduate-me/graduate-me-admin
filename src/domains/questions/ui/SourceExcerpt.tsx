@@ -25,10 +25,6 @@ export function SourceExcerpt({ source }: { source: Source }) {
       </Stack>
       <Blockquote
         style={{
-          margin: 0,
-          padding: 16,
-          background: 'var(--color-info-muted)',
-          borderRadius: 8,
           whiteSpace: 'pre-wrap',
         }}>
         {source.quote}
