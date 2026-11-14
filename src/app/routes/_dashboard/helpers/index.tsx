@@ -1,7 +1,13 @@
+import { Button } from '@astryxdesign/core/Button';
+import { EmptyState } from '@astryxdesign/core/EmptyState';
+import { Text } from '@astryxdesign/core/Text';
+import { Stack } from '@astryxdesign/core/Stack';
+import { Badge } from '@astryxdesign/core/Badge';
+import { Banner } from '@astryxdesign/core/Banner';
+import { DataTable } from '@/components/ui/DataTable';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, redirect } from '@tanstack/react-router';
-import { Alert, Button, Empty, Space, Table, Tag, Typography } from 'antd';
 import { helpersQuery } from '@/domains/operations/api/operations';
 import type { Helper } from '@/domains/operations/model/contracts';
 import { PageHeading } from '../-components/PageHeading';
@@ -48,10 +54,10 @@ function Helpers() {
         description='프로필의 조교 타이틀과 커뮤니티 태그 모아보기를 관리합니다.'
         action={
           <Button
-            type='primary'
-            onClick={() => setEditing(null)}>
-            조교 등록
-          </Button>
+            onClick={() => setEditing(null)}
+            variant='primary'
+            label='조교 등록'
+          />
         }
       />
       {query.error && (
@@ -70,17 +76,12 @@ function Helpers() {
           { value: 'inactive', label: '비활성' },
         ]}
       />
-      <Table
+      <DataTable
         rowKey='userId'
         dataSource={items}
         loading={query.isPending}
         locale={{
-          emptyText: (
-            <Empty
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description='등록된 조교가 없습니다.'
-            />
-          ),
+          emptyText: <EmptyState title='등록된 조교가 없습니다.' />,
         }}
         pagination={{
           current: tablePage(search.page, items.length),
@@ -95,38 +96,39 @@ function Helpers() {
             key: 'name',
             width: '30%',
             render: (_, item) => (
-              <Space
-                orientation='vertical'
-                size={0}>
-                <Typography.Text strong>
-                  {item.name || '이름 없음'}
-                </Typography.Text>
-                <Typography.Text type='secondary'>{item.email}</Typography.Text>
-              </Space>
+              <Stack
+                direction='vertical'
+                gap={2}>
+                <Text weight='semibold'>{item.name || '이름 없음'}</Text>
+                <Text color='secondary'>{item.email}</Text>
+              </Stack>
             ),
           },
           {
             title: '상태',
             dataIndex: 'active',
             render: (active) => (
-              <Tag
-                color={active ? 'green' : undefined}
-                bordered={false}>
-                {active ? '활성' : '비활성'}
-              </Tag>
+              <Badge
+                variant={active ? 'green' : undefined}
+                label={<>{active ? '활성' : '비활성'}</>}
+              />
             ),
           },
           {
             title: '관리',
             key: 'edit',
             render: (_, item) => (
-              <Button onClick={() => setEditing(item)}>자격 편집</Button>
+              <Button
+                onClick={() => setEditing(item)}
+                variant='secondary'
+                label='자격 편집'
+              />
             ),
           },
         ]}
       />
-      <Alert
-        type='info'
+      <Banner
+        status='info'
         title='조교는 일반 사용자와 같은 서비스 웹을 사용합니다.'
         description='조교 자격으로 운영 콘솔이나 다른 사용자의 개인 기록에 접근할 수 없습니다.'
       />

@@ -1,5 +1,11 @@
+import { Card } from '@astryxdesign/core/Card';
+import { Text } from '@astryxdesign/core/Text';
+import { EmptyState } from '@astryxdesign/core/EmptyState';
+import { Badge } from '@astryxdesign/core/Badge';
+import { Banner } from '@astryxdesign/core/Banner';
+import { Metric } from '@/components/ui/Metric';
+import { DataTable } from '@/components/ui/DataTable';
 import { useQuery } from '@tanstack/react-query';
-import { Alert, Card, Empty, Statistic, Table, Tag, Typography } from 'antd';
 import { usageQuery } from '@/domains/operations/api/operations';
 import { formatDate } from '@/domains/questions/lib/format';
 import { PageHeading } from '../../-components/PageHeading';
@@ -49,8 +55,10 @@ export function ProcessingJobs({
       )}
       <div className='grid grid-cols-4 gap-5'>
         {counts.map(([title, value]) => (
-          <Card key={title}>
-            <Statistic
+          <Card
+            key={title}
+            padding={5}>
+            <Metric
               title={title}
               value={query.data ? value : undefined}
               formatter={(shown) => (query.data ? shown : '미확인')}
@@ -71,26 +79,23 @@ export function ProcessingJobs({
           { value: 'failed', label: '실패' },
         ]}
       />
-      <Table
+      <DataTable
         rowKey='id'
         loading={query.isPending}
         dataSource={items}
         expandable={{
           expandedRowRender: (item) => (
-            <Typography.Paragraph className='mb-0!'>
+            <Text
+              className='mb-0!'
+              as='p'>
               {item.errorMessage || '기록된 오류가 없습니다.'} · 작업 시도{' '}
               {item.attempts}회
-            </Typography.Paragraph>
+            </Text>
           ),
           rowExpandable: (item) => Boolean(item.errorMessage),
         }}
         locale={{
-          emptyText: (
-            <Empty
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description='기록된 처리 작업이 없습니다.'
-            />
-          ),
+          emptyText: <EmptyState title='기록된 처리 작업이 없습니다.' />,
         }}
         pagination={{
           current: search.page,
@@ -107,11 +112,12 @@ export function ProcessingJobs({
             render: (_, item) => (
               <div>
                 {item.title}
-                <Typography.Paragraph
-                  type='secondary'
-                  className='mt-1! mb-0!'>
+                <Text
+                  className='mt-1! mb-0!'
+                  as='p'
+                  color='secondary'>
                   {item.id}
-                </Typography.Paragraph>
+                </Text>
               </div>
             ),
           },
@@ -120,23 +126,26 @@ export function ProcessingJobs({
             title: '상태',
             dataIndex: 'status',
             render: (status: string) => (
-              <Tag
-                bordered={false}
-                color={status.toLowerCase() === 'failed' ? 'red' : 'blue'}>
-                {(
-                  {
-                    ready: '완료',
-                    completed: '완료',
-                    done: '완료',
-                    pending: '대기 중',
-                    queued: '대기 중',
-                    processing: '처리 중',
-                    preparing: '자료 준비 중',
-                    transcribing: '전사 중',
-                    failed: '실패',
-                  } as Record<string, string>
-                )[status.toLowerCase()] || status}
-              </Tag>
+              <Badge
+                variant={status.toLowerCase() === 'failed' ? 'red' : 'blue'}
+                label={
+                  <>
+                    {(
+                      {
+                        ready: '완료',
+                        completed: '완료',
+                        done: '완료',
+                        pending: '대기 중',
+                        queued: '대기 중',
+                        processing: '처리 중',
+                        preparing: '자료 준비 중',
+                        transcribing: '전사 중',
+                        failed: '실패',
+                      } as Record<string, string>
+                    )[status.toLowerCase()] || status}
+                  </>
+                }
+              />
             ),
           },
           {
@@ -147,16 +156,12 @@ export function ProcessingJobs({
           {
             title: '비용 정보',
             key: 'cost',
-            render: () => (
-              <Typography.Text type='secondary'>
-                AI 실행 기록에서 확인
-              </Typography.Text>
-            ),
+            render: () => <Text color='secondary'>AI 실행 기록에서 확인</Text>,
           },
         ]}
       />
-      <Alert
-        type='info'
+      <Banner
+        status='info'
         title='이 표는 영상 준비 큐의 상태를 표시합니다. 공급자가 반환한 토큰과 설정 단가 기반 추정 비용은 AI 실행 기록에서 확인합니다.'
       />
     </section>

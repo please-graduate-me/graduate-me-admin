@@ -1,6 +1,11 @@
+import { Text } from '@astryxdesign/core/Text';
+import { EmptyState } from '@astryxdesign/core/EmptyState';
+import { Badge } from '@astryxdesign/core/Badge';
+import { Heading } from '@astryxdesign/core/Heading';
+import { Card } from '@astryxdesign/core/Card';
+import { DataTable } from '@/components/ui/DataTable';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { Card, Empty, Table, Tag, Typography } from 'antd';
 import { materialListQuery } from '@/domains/operations/api/operations';
 import { formatDate } from '@/domains/questions/lib/format';
 import { QueryError } from '../QueryError';
@@ -12,26 +17,28 @@ export function OverviewMaterials({ period }: { period: 'all' | '7' | '30' }) {
   );
 
   return (
-    <Card
-      title='최근 등록 자료'
-      extra={
+    <Card padding={5}>
+      {
         <Link
           to='/materials'
           search={{ period }}>
           자료 관리
         </Link>
-      }>
+      }
+      <Heading level={3}>{'최근 등록 자료'}</Heading>
       {query.error && (
         <QueryError
           error={query.error}
           retry={() => query.refetch()}
         />
       )}
-      <Typography.Paragraph type='secondary'>
+      <Text
+        as='p'
+        color='secondary'>
         선택 기간에 등록된 자료{' '}
         {query.data?.total.toLocaleString('ko-KR') ?? '미확인'}개 중 최근 5개
-      </Typography.Paragraph>
-      <Table
+      </Text>
+      <DataTable
         rowKey={(item) => `${item.kind}-${item.id}`}
         size='small'
         pagination={false}
@@ -39,9 +46,8 @@ export function OverviewMaterials({ period }: { period: 'all' | '7' | '30' }) {
         dataSource={query.data?.items.slice(0, 5) ?? []}
         locale={{
           emptyText: (
-            <Empty
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description={
+            <EmptyState
+              title={
                 query.error
                   ? '자료를 조회하지 못했습니다.'
                   : '등록된 자료가 없습니다.'
@@ -62,13 +68,19 @@ export function OverviewMaterials({ period }: { period: 'all' | '7' | '30' }) {
             dataIndex: 'visibility',
             width: 100,
             render: (visibility: 'public' | 'private' | 'accounts') => (
-              <Tag>
-                {
-                  { public: '공용', private: '비공개', accounts: '지정 계정' }[
-                    visibility
-                  ]
+              <Badge
+                label={
+                  <>
+                    {
+                      {
+                        public: '공용',
+                        private: '비공개',
+                        accounts: '지정 계정',
+                      }[visibility]
+                    }
+                  </>
                 }
-              </Tag>
+              />
             ),
           },
           {

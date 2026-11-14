@@ -25,17 +25,19 @@
     "routes:generate": "tsr generate"
   },
   "dependencies": {
-    "@ant-design/cssinjs": "^2.1.2",
-    "@ant-design/icons": "^6.3.4",
+    "@astryxdesign/core": "0.7.16",
+    "@astryxdesign/theme-neutral": "0.7.16",
+    "@stylexjs/stylex": "^0.19.2",
     "@tanstack/react-query": "^5.107.1",
     "@tanstack/react-router": "^1.170.46",
-    "antd": "^6.7.0",
     "pdfjs-dist": "6.5.438",
+    "rc-field-form": "^2.7.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@astryxdesign/cli": "0.7.16",
     "@eslint/js": "^9.39.5",
     "@stylistic/eslint-plugin": "^5.10.0",
     "@tailwindcss/vite": "^4.3.5",

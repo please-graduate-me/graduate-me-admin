@@ -1,58 +1,58 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Outlet, useRouteContext } from '@tanstack/react-router';
-import { App, Button, Layout, Space, Tag, Typography } from 'antd';
+import { AppShell } from '@astryxdesign/core/AppShell';
+import { TopNav } from '@astryxdesign/core/TopNav';
+import { Button } from '@astryxdesign/core/Button';
+import { Badge } from '@astryxdesign/core/Badge';
+import { HStack } from '@astryxdesign/core/HStack';
+import { Text } from '@astryxdesign/core/Text';
+import { useToast } from '@astryxdesign/core/Toast';
 import { logout as signout } from '@/domains/auth/api/auth';
 import { Sidebar } from './Sidebar';
 
-/** 별도 admin 앱의 데스크톱 셸과 로그인된 업무 역할을 표시한다. */
+/** 운영 역할과 탐색·알림을 Astryx 앱 셸 안에서 연결한다. */
 export function DashboardLayout() {
   const { access } = useRouteContext({ from: '/_dashboard' });
   const client = useQueryClient();
-  const { message } = App.useApp();
+  const toast = useToast();
 
   const logout = useMutation({
     mutationFn: signout,
     onSuccess: () => client.clear(),
-    onError: (error) => message.error(error.message),
+    onError: (error) => toast({ type: 'error', body: error.message }),
   });
 
   return (
-    <Layout className='min-h-dvh min-w-[1200px]'>
-      <Layout.Sider
-        width={240}
-        className='sticky! top-0 h-dvh shrink-0'>
-        <Sidebar access={access} />
-      </Layout.Sider>
-      <Layout className='min-w-0'>
-        <Layout.Header className='flex items-center justify-between gap-4'>
-          <Typography.Text
-            type='secondary'
-            style={{ fontSize: 12 }}>
-            관리 콘솔 / 운영 관리
-          </Typography.Text>
-          <Space size={16}>
-            <img
-              src={`${import.meta.env.BASE_URL}icons/bell.svg`}
-              alt=''
-              width={20}
-              height={20}
-            />
-            <Typography.Text style={{ fontSize: 12 }}>
-              {access.user.name ?? '운영 관리자'}
-            </Typography.Text>
-            <Tag bordered={false}>admin</Tag>
-            <Button
-              type='text'
-              loading={logout.isPending}
-              onClick={() => logout.mutate()}>
-              로그아웃
-            </Button>
-          </Space>
-        </Layout.Header>
-        <Layout.Content className='min-w-0 p-7'>
-          <Outlet />
-        </Layout.Content>
-      </Layout>
-    </Layout>
+    <AppShell
+      height='auto'
+      contentPadding={6}
+      sideNav={<Sidebar access={access} />}
+      topNav={
+        <TopNav
+          label='운영 도구'
+          heading={<Text weight='semibold'>graduate me / 운영 관리</Text>}
+          endContent={
+            <HStack
+              gap={3}
+              align='center'>
+              <Text>{access.user.name ?? '운영 관리자'}</Text>
+              <Badge
+                label='admin'
+                variant='info'
+              />
+              <Button
+                label='로그아웃'
+                variant='ghost'
+                isLoading={logout.isPending}
+                onClick={() => logout.mutate()}
+              />
+            </HStack>
+          }
+        />
+      }>
+      <main className='min-w-0'>
+        <Outlet />
+      </main>
+    </AppShell>
   );
 }

@@ -1,5 +1,10 @@
+import { EmptyState } from '@astryxdesign/core/EmptyState';
+import { Text } from '@astryxdesign/core/Text';
+import { Selector } from '@astryxdesign/core/Selector';
+import { Badge } from '@astryxdesign/core/Badge';
+import { Stack } from '@astryxdesign/core/Stack';
+import { DataTable } from '@/components/ui/DataTable';
 import { useState } from 'react';
-import { Empty, Select, Space, Table, Tag, Typography } from 'antd';
 import type { Content, Revision } from '@/domains/content/model/contracts';
 import { formatDate } from '@/domains/questions/lib/format';
 
@@ -55,13 +60,7 @@ export function ContentVersionHistory({
     ordered.find((item) => item.version < content.version) ??
     ordered[0];
 
-  if (!previous)
-    return (
-      <Empty
-        image={Empty.PRESENTED_IMAGE_SIMPLE}
-        description='보존된 이전 버전이 없습니다.'
-      />
-    );
+  if (!previous) return <EmptyState title='보존된 이전 버전이 없습니다.' />;
   const before = previous.payload as Record<string, unknown>;
   const after = content.payload as Record<string, unknown>;
 
@@ -77,26 +76,31 @@ export function ContentVersionHistory({
 
   return (
     <div className='flex flex-col gap-4'>
-      <Space wrap>
-        <Typography.Text>비교할 이전 버전</Typography.Text>
-        <Select
-          value={previous.version}
-          className='w-80!'
-          onChange={setSelected}
+      <Stack
+        direction='horizontal'
+        gap={2}>
+        <Text>비교할 이전 버전</Text>
+        <Selector
+          value={String(previous.version)}
+          containerClassName='w-80!'
+          onChange={(value) => setSelected(Number(value))}
           options={ordered.map((item) => ({
-            value: item.version,
+            value: String(item.version),
             label: `v${item.version} · ${formatDate(item.createdAt)} · ${item.actor.name}`,
           }))}
+          label='입력'
+          isLabelHidden
         />
-        <Tag>현재 v{content.version}</Tag>
-      </Space>
-      <Typography.Paragraph
+        <Badge label={<>현재 v{content.version}</>} />
+      </Stack>
+      <Text
         className='mb-0!'
-        type='secondary'>
+        as='p'
+        color='secondary'>
         {previous.actor.name} · {previous.reason || '최초 생성'} ·{' '}
         {formatDate(previous.createdAt)}
-      </Typography.Paragraph>
-      <Table
+      </Text>
+      <DataTable
         rowKey='key'
         dataSource={rows}
         pagination={false}
@@ -107,32 +111,34 @@ export function ContentVersionHistory({
             title: `이전 v${previous.version}`,
             dataIndex: 'before',
             render: (value) => (
-              <Typography.Paragraph
+              <Text
                 className='mb-0!'
-                style={{ whiteSpace: 'pre-wrap' }}>
+                style={{ whiteSpace: 'pre-wrap' }}
+                as='p'>
                 {value}
-              </Typography.Paragraph>
+              </Text>
             ),
           },
           {
             title: `현재 v${content.version}`,
             dataIndex: 'after',
             render: (value, row) => (
-              <Typography.Paragraph
+              <Text
                 className='mb-0!'
                 style={{
                   whiteSpace: 'pre-wrap',
                   fontWeight: row.changed ? 600 : 400,
-                }}>
+                }}
+                as='p'>
                 {value}
                 {row.changed && (
-                  <Tag
-                    color='blue'
-                    className='ml-2!'>
-                    변경됨
-                  </Tag>
+                  <Badge
+                    variant='blue'
+                    className='ml-2!'
+                    label={<>변경됨</>}
+                  />
                 )}
-              </Typography.Paragraph>
+              </Text>
             ),
           },
         ]}

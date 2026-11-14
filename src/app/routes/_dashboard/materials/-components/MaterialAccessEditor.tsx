@@ -1,14 +1,16 @@
+import { TextArea } from '@astryxdesign/core/TextArea';
+import { useToast } from '@astryxdesign/core/Toast';
+import { Text } from '@astryxdesign/core/Text';
+import { Banner } from '@astryxdesign/core/Banner';
+import { Spinner } from '@astryxdesign/core/Spinner';
+import { Selector } from '@astryxdesign/core/Selector';
+import { CheckboxInput } from '@astryxdesign/core/CheckboxInput';
+import { DialogHeader } from '@astryxdesign/core/Dialog';
+import { Button } from '@astryxdesign/core/Button';
+import { Dialog } from '@astryxdesign/core/Dialog';
+import Form from 'rc-field-form';
+import { FormField } from '@/components/ui/FormField';
 import { useQuery } from '@tanstack/react-query';
-import {
-  Alert,
-  App,
-  Checkbox,
-  Form,
-  Modal,
-  Select,
-  Spin,
-  Typography,
-} from 'antd';
 import {
   materialAccessQuery,
   useSaveMaterialAccess,
@@ -37,7 +39,7 @@ export function MaterialAccessEditor({
   >();
 
   const mutation = useSaveMaterialAccess(material.id);
-  const { message } = App.useApp();
+  const toast = useToast();
 
   const canPublish =
     query.data?.ownerId === userId || query.data?.visibility === 'public';
@@ -58,115 +60,147 @@ export function MaterialAccessEditor({
           values.visibility === 'accounts' ? values.allowedUserIds : [],
       });
 
-      message.success('자료의 원본 접근 범위를 저장했습니다.');
+      toast({
+        type: 'info',
+        body: '자료의 원본 접근 범위를 저장했습니다.',
+      });
+
       onClose();
     } catch (error) {
-      if (error instanceof Error) message.error(error.message);
+      if (error instanceof Error)
+        toast({
+          type: 'error',
+          body: error.message,
+        });
     }
   }
 
   return (
-    <Modal
-      open
-      title='자료 원본 접근 범위'
-      onCancel={() => {
+    <Dialog
+      isOpen
+      onOpenChange={() => {
         if (!mutation.isPending) onClose();
       }}
-      onOk={save}
-      okText='접근 범위 저장'
-      cancelText='취소'
-      okButtonProps={{ disabled: !query.data || !canPublish }}
-      confirmLoading={mutation.isPending}
       width={680}>
-      <Typography.Paragraph strong>{material.title}</Typography.Paragraph>
-      <Alert
+      <DialogHeader
+        title={'자료 원본 접근 범위'}
+        onOpenChange={() => {
+          if (!mutation.isPending) onClose();
+        }}
+      />
+      <Text
+        as='p'
+        weight='semibold'>
+        {material.title}
+      </Text>
+      <Banner
         className='mb-5!'
-        type='info'
+        status='info'
         title='원본 자료 공개와 질문 발췌 공유는 별개입니다.'
         description='여기서 허용한 계정은 원본을 읽을 수 있습니다. 소유자의 개인 메모·대화·답안은 공개되지 않습니다.'
       />
       {query.error && (
-        <Alert
-          type='error'
+        <Banner
+          status='error'
           title={query.error.message}
         />
       )}
-      {query.isPending && <Spin />}
+      {query.isPending && <Spinner label='불러오는 중' />}
       {query.data && (
-        <Form
-          key={`${material.id}:${query.data.version}`}
-          form={form}
-          layout='vertical'
-          initialValues={{
-            visibility: query.data.visibility,
-            allowedUserIds: query.data.allowedUserIds,
-            confirmed: false,
-          }}
-          disabled={!canPublish || mutation.isPending}>
-          <Typography.Paragraph type='secondary'>
-            원본 버전 v{query.data.version}
-          </Typography.Paragraph>
-          {!canPublish && (
-            <Alert
-              className='mb-4!'
-              type='warning'
-              title='타인의 비공개 자료를 운영 권한으로 공개 전환할 수 없습니다.'
-              description='소유자가 공개 범위를 정하거나 운영자가 이용 권한을 확보한 원본을 직접 등록해야 합니다.'
-            />
-          )}
-          <Form.Item
-            name='visibility'
-            label='열람 범위'
-            rules={[{ required: true }]}>
-            <Select
-              options={[
-                { value: 'private', label: '자료 소유자만' },
-                { value: 'public', label: '로그인한 모든 학생 · 공용 자료' },
-                { value: 'accounts', label: '지정한 계정만' },
-              ]}
-            />
-          </Form.Item>
-          {visibility === 'accounts' && (
-            <Form.Item
-              name='allowedUserIds'
-              label='열람 허용 계정'
-              extra='허용할 계정 식별자를 입력해 주세요. 도우미의 담당 자료 배정과는 별개입니다.'
+        <fieldset
+          disabled={!canPublish || mutation.isPending}
+          className='m-0 min-w-0 border-0 p-0'>
+          <Form
+            key={`${material.id}:${query.data.version}`}
+            form={form}
+            initialValues={{
+              visibility: query.data.visibility,
+              allowedUserIds: query.data.allowedUserIds,
+              confirmed: false,
+            }}>
+            <Text
+              as='p'
+              color='secondary'>
+              원본 버전 v{query.data.version}
+            </Text>
+            {!canPublish && (
+              <Banner
+                className='mb-4!'
+                status='warning'
+                title='타인의 비공개 자료를 운영 권한으로 공개 전환할 수 없습니다.'
+                description='소유자가 공개 범위를 정하거나 운영자가 이용 권한을 확보한 원본을 직접 등록해야 합니다.'
+              />
+            )}
+            <FormField
+              name='visibility'
+              label='열람 범위'
+              rules={[{ required: true }]}>
+              <Selector
+                options={[
+                  { value: 'private', label: '자료 소유자만' },
+                  { value: 'public', label: '로그인한 모든 학생 · 공용 자료' },
+                  { value: 'accounts', label: '지정한 계정만' },
+                ]}
+                label='입력'
+                isLabelHidden
+                value={''}
+              />
+            </FormField>
+            {visibility === 'accounts' && (
+              <FormField
+                name='allowedUserIds'
+                normalize={(text: string) =>
+                  text.split(/[\s,]+/).filter(Boolean)
+                }
+                getValueProps={(values: string[] = []) => ({
+                  value: values.join('\n'),
+                })}
+                label='열람 허용 계정'
+                description='허용할 계정 식별자를 입력해 주세요. 도우미의 담당 자료 배정과는 별개입니다.'
+                rules={[
+                  {
+                    required: true,
+                    type: 'array',
+                    min: 1,
+                    message: '하나 이상의 계정을 지정해 주세요.',
+                  },
+                ]}>
+                <TextArea
+                  label='열람 허용 계정'
+                  value=''
+                  placeholder='계정 식별자를 한 줄에 하나씩 입력'
+                />
+              </FormField>
+            )}
+            <FormField
+              name='confirmed'
               rules={[
                 {
-                  required: true,
-                  type: 'array',
-                  min: 1,
-                  message: '하나 이상의 계정을 지정해 주세요.',
+                  validator: (_, value) =>
+                    value
+                      ? Promise.resolve()
+                      : Promise.reject(
+                          new Error(
+                            '변경할 공개 범위와 이용 권한을 확인해 주세요.'
+                          )
+                        ),
                 },
               ]}>
-              <Select
-                mode='tags'
-                tokenSeparators={[',', ' ']}
-                placeholder='계정 식별자 추가'
+              <CheckboxInput
+                label='등록 원본의 이용 권한과 위 계정에 대한 공개 범위를 확인했습니다.'
+                value={false}
               />
-            </Form.Item>
-          )}
-          <Form.Item
-            name='confirmed'
-            valuePropName='checked'
-            rules={[
-              {
-                validator: (_, value) =>
-                  value
-                    ? Promise.resolve()
-                    : Promise.reject(
-                        new Error(
-                          '변경할 공개 범위와 이용 권한을 확인해 주세요.'
-                        )
-                      ),
-              },
-            ]}>
-            <Checkbox>
-              등록 원본의 이용 권한과 위 계정에 대한 공개 범위를 확인했습니다.
-            </Checkbox>
-          </Form.Item>
-        </Form>
+            </FormField>
+          </Form>
+        </fieldset>
       )}
-    </Modal>
+      <Button
+        label={'접근 범위 저장'}
+        variant='primary'
+        onClick={save}
+        isLoading={mutation.isPending}
+        isDisabled={!query.data || !canPublish}
+      />
+    </Dialog>
   );
 }

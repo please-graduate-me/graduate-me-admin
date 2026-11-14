@@ -1,15 +1,16 @@
+import { MetadataListItem } from '@astryxdesign/core/MetadataList';
+import { MetadataList } from '@astryxdesign/core/MetadataList';
+import { Banner } from '@astryxdesign/core/Banner';
+import { Card } from '@astryxdesign/core/Card';
+import { Text } from '@astryxdesign/core/Text';
+import { Heading } from '@astryxdesign/core/Heading';
+import { SegmentedControlItem } from '@astryxdesign/core/SegmentedControl';
+import { SegmentedControl } from '@astryxdesign/core/SegmentedControl';
+import { EmptyState } from '@astryxdesign/core/EmptyState';
+import { Badge } from '@astryxdesign/core/Badge';
+import { Metric } from '@/components/ui/Metric';
+import { DataTable } from '@/components/ui/DataTable';
 import { useQuery } from '@tanstack/react-query';
-import {
-  Alert,
-  Card,
-  Descriptions,
-  Empty,
-  Segmented,
-  Statistic,
-  Table,
-  Tag,
-  Typography,
-} from 'antd';
 import { aiProviderLabel } from '@/domains/operations/lib/providerLabel';
 import { aiUsageQuery } from '@/domains/operations/api/operations';
 import { formatDate } from '@/domains/questions/lib/format';
@@ -85,15 +86,17 @@ export function AIUsageLedger({
           retry={() => query.refetch()}
         />
       )}
-      <Alert
-        type='info'
+      <Banner
+        status='info'
         title='현재 검색·공급자·상태·기간 조건 전체의 집계입니다.'
         description='요약과 비용·토큰 합계는 모든 검색 결과를 집계하며 표는 20개씩 표시합니다.'
       />
       <div className='grid grid-cols-4 gap-5'>
         {counts.map(([title, value]) => (
-          <Card key={title}>
-            <Statistic
+          <Card
+            key={title}
+            padding={5}>
+            <Metric
               title={title}
               value={value}
               formatter={(shown) => (value === undefined ? '미확인' : shown)}
@@ -103,11 +106,10 @@ export function AIUsageLedger({
         ))}
       </div>
       {data && (
-        <Card title='추정 비용과 사용 한도'>
-          <Descriptions
-            column={3}
-            size='small'
-            items={[
+        <Card padding={5}>
+          <Heading level={3}>{'추정 비용과 사용 한도'}</Heading>
+          <MetadataList columns={3}>
+            {[
               {
                 key: 'estimated',
                 label: '설정 단가 기반 추정 · USD',
@@ -141,11 +143,18 @@ export function AIUsageLedger({
                 label: '한 번에 준비할 PDF 범위',
                 children: `최대 ${data.limits.maxPreparationPages}페이지`,
               },
-            ]}
-          />
-          <Typography.Paragraph
-            type='secondary'
-            className='mt-3! mb-0!'>
+            ].map((item) => (
+              <MetadataListItem
+                key={item.key}
+                label={item.label}>
+                {item.children}
+              </MetadataListItem>
+            ))}
+          </MetadataList>
+          <Text
+            className='mt-3! mb-0!'
+            as='p'
+            color='secondary'>
             토큰 미제공 {data.summary.unmeasuredRequests}건 · 실행 중{' '}
             {data.summary.running}건 · 요청 시 예약 토큰 합계{' '}
             {data.summary.reservedTokens.toLocaleString()}개. 토큰 합계는
@@ -153,20 +162,27 @@ export function AIUsageLedger({
             실행은 미제공으로 표시합니다. 비용은 해당 공급자와 모델에 설정된
             단가로 추정하며 단가가 없는 실행은 미집계입니다. 한도에 도달해도
             저장된 설명·대화·문제 조회는 이용할 수 있습니다.
-          </Typography.Paragraph>
+          </Text>
         </Card>
       )}
-      <Segmented
+      <SegmentedControl
         value={provider}
         onChange={(value) => onProvider(String(value))}
-        options={[
+        label='표시 조건'>
+        {[
           { value: 'all', label: '전체 공급자' },
           ...['naver', 'anthropic', 'gemini'].map((value) => ({
             value,
             label: aiProviderLabel(value),
           })),
-        ]}
-      />
+        ].map((item) => (
+          <SegmentedControlItem
+            key={item.value}
+            value={item.value}
+            label={item.label}
+          />
+        ))}
+      </SegmentedControl>
       <ListFilters
         value={search}
         onChange={onChange}
@@ -177,7 +193,7 @@ export function AIUsageLedger({
           { value: 'failed', label: '실패' },
         ]}
       />
-      <Table
+      <DataTable
         rowKey='id'
         dataSource={items}
         loading={query.isPending}
@@ -190,17 +206,14 @@ export function AIUsageLedger({
         }}
         locale={{
           emptyText: (
-            <Empty
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description='조건에 맞는 AI 실행 기록이 없습니다.'
-            />
+            <EmptyState title='조건에 맞는 AI 실행 기록이 없습니다.' />
           ),
         }}
         expandable={{
           rowExpandable: (item) => Boolean(item.error),
           expandedRowRender: (item) => (
-            <Alert
-              type='error'
+            <Banner
+              status='error'
               title={item.error || '실행 실패'}
             />
           ),
@@ -211,22 +224,23 @@ export function AIUsageLedger({
             key: 'task',
             render: (_, item) => (
               <>
-                <Tag
-                  color={
+                <Badge
+                  variant={
                     item.provider === 'naver'
                       ? 'green'
                       : item.provider === 'anthropic'
                         ? 'purple'
                         : 'blue'
-                  }>
-                  {aiProviderLabel(item.provider)}
-                </Tag>
+                  }
+                  label={<>{aiProviderLabel(item.provider)}</>}
+                />
                 {taskLabels[item.task] || item.task}
-                <Typography.Paragraph
-                  type='secondary'
-                  className='mt-1! mb-0!'>
+                <Text
+                  className='mt-1! mb-0!'
+                  as='p'
+                  color='secondary'>
                   {item.model}
-                </Typography.Paragraph>
+                </Text>
               </>
             ),
           },
@@ -236,12 +250,13 @@ export function AIUsageLedger({
             render: (_, item) => (
               <>
                 {item.user.name || '시스템 또는 삭제 계정'}
-                <Typography.Paragraph
-                  type='secondary'
+                <Text
                   className='mt-1! mb-0!'
-                  ellipsis={{ tooltip: item.sourceKey }}>
+                  as='p'
+                  color='secondary'
+                  maxLines={1}>
                   {item.sourceKey}
-                </Typography.Paragraph>
+                </Text>
               </>
             ),
           },
@@ -249,20 +264,24 @@ export function AIUsageLedger({
             title: '상태',
             dataIndex: 'status',
             render: (status) => (
-              <Tag
-                color={
+              <Badge
+                variant={
                   status === 'failed'
                     ? 'red'
                     : status === 'succeeded'
                       ? 'green'
                       : 'blue'
-                }>
-                {status === 'failed'
-                  ? '실패'
-                  : status === 'succeeded'
-                    ? '완료'
-                    : '실행 중'}
-              </Tag>
+                }
+                label={
+                  <>
+                    {status === 'failed'
+                      ? '실패'
+                      : status === 'succeeded'
+                        ? '완료'
+                        : '실행 중'}
+                  </>
+                }
+              />
             ),
           },
           {

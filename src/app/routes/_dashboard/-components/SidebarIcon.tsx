@@ -1,15 +1,28 @@
-type Props = { name: string; selected?: boolean };
+import { Icon, type IconName } from '@astryxdesign/core/Icon';
 
-/** Figma의 20px 원본 아이콘을 탐색 영역의 현재 상태로 표시한다. */
-export function SidebarIcon({ name, selected = false }: Props) {
+const icons: Record<string, IconName> = {
+  'layout-grid': 'viewColumns',
+  'file-text': 'copy',
+  'message-circle': 'info',
+  flag: 'warning',
+  users: 'viewColumns',
+  'chart-no-axes-column': 'arrowsUpDown',
+  clock: 'clock',
+};
+
+/** 업무 메뉴 아이콘을 Astryx 의미 아이콘과 현재 선택 색상으로 표시한다. */
+export function SidebarIcon({
+  name,
+  selected = false,
+}: {
+  name: string;
+  selected?: boolean;
+}) {
   return (
-    <img
-      src={`${import.meta.env.BASE_URL}icons/${name}.svg`}
-      alt=''
-      width={20}
-      height={20}
-      className='shrink-0'
-      style={{ filter: selected ? 'brightness(0) invert(1)' : undefined }}
+    <Icon
+      icon={icons[name] ?? 'info'}
+      color={selected ? 'accent' : 'secondary'}
+      size='md'
     />
   );
 }

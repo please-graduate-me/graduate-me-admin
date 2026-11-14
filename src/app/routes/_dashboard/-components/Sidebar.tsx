@@ -1,151 +1,84 @@
-import { Link, useLocation } from '@tanstack/react-router';
-import { Divider, Menu, Typography, theme } from 'antd';
-import type { MenuProps } from 'antd';
+import { useLocation, useNavigate } from '@tanstack/react-router';
+import {
+  SideNav,
+  SideNavItem,
+  SideNavSection,
+} from '@astryxdesign/core/SideNav';
+import { Heading } from '@astryxdesign/core/Heading';
+import { Text } from '@astryxdesign/core/Text';
 import type { WorkspaceAccess } from '@/domains/auth/model/contracts';
 import { SidebarIcon } from './SidebarIcon';
-import { adminNavigation } from '../../../theme';
 
-/** 학생의 학습 탐색과 분리해 도우미·운영자의 업무 메뉴만 구성한다. */
+const links = [
+  { path: '/', label: '운영 현황', icon: 'layout-grid' },
+  { path: '/materials', label: '자료 관리', icon: 'file-text' },
+  {
+    path: '/questions',
+    label: '기존 질문 · 자료 신고',
+    icon: 'message-circle',
+  },
+  { path: '/reviews', label: '신고 · 수정 요청', icon: 'flag' },
+  { path: '/moderation', label: '게시물 신고', icon: 'flag' },
+  { path: '/helpers', label: '조교 자격', icon: 'users' },
+  { path: '/usage', label: 'AI 사용량', icon: 'chart-no-axes-column' },
+  { path: '/shares', label: '공유 링크', icon: 'file-text' },
+  { path: '/events', label: '운영 이력', icon: 'clock' },
+] as const;
+
+/** 운영자가 접근할 업무 메뉴와 현재 위치를 Astryx 탐색으로 표시한다. */
 export function Sidebar({ access }: { access: WorkspaceAccess }) {
   const pathname = useLocation({ select: (location) => location.pathname });
-  const { token } = theme.useToken();
-
-  const selected = pathname.startsWith('/questions')
-    ? '/questions'
-    : pathname.startsWith('/courses')
-      ? '/courses'
-      : pathname;
-
-  const items: MenuProps['items'] = [];
-
-  if (access.role === 'admin')
-    items.push({
-      type: 'group',
-      label: '운영 관리',
-      children: [
-        {
-          key: '/questions',
-          label: <Link to='/questions'>기존 질문 · 자료 신고</Link>,
-        },
-        { key: '/events', label: <Link to='/events'>운영 이력</Link> },
-        {
-          key: '/',
-          icon: (
-            <SidebarIcon
-              name='layout-grid'
-              selected={selected === '/'}
-            />
-          ),
-          label: <Link to='/'>운영 현황</Link>,
-        },
-        {
-          key: '/materials',
-          icon: (
-            <SidebarIcon
-              name='file-text'
-              selected={selected === '/materials'}
-            />
-          ),
-          label: <Link to='/materials'>자료 관리</Link>,
-        },
-        {
-          key: '/reviews',
-          icon: (
-            <SidebarIcon
-              name='flag'
-              selected={selected === '/reviews'}
-            />
-          ),
-          label: <Link to='/reviews'>신고 · 수정 요청</Link>,
-        },
-        {
-          key: '/moderation',
-          icon: (
-            <SidebarIcon
-              name='flag'
-              selected={selected === '/moderation'}
-            />
-          ),
-          label: <Link to='/moderation'>게시물 신고</Link>,
-        },
-        {
-          key: '/helpers',
-          icon: (
-            <SidebarIcon
-              name='users'
-              selected={selected === '/helpers'}
-            />
-          ),
-          label: <Link to='/helpers'>조교 자격</Link>,
-        },
-        {
-          key: '/usage',
-          icon: (
-            <SidebarIcon
-              name='chart-no-axes-column'
-              selected={selected === '/usage'}
-            />
-          ),
-          label: <Link to='/usage'>AI 사용량</Link>,
-        },
-        {
-          key: '/shares',
-          icon: (
-            <SidebarIcon
-              name='file-text'
-              selected={selected === '/shares'}
-            />
-          ),
-          label: <Link to='/shares'>공유 링크</Link>,
-        },
-      ],
-    });
+  const navigate = useNavigate();
 
   return (
-    <nav
+    <SideNav
       aria-label='admin 주 탐색'
-      className='flex h-dvh flex-col p-4'>
-      <div className='mb-5 flex flex-col gap-1 px-2 py-2'>
-        <Typography.Text
-          style={{
-            color: token.colorWhite,
-            fontFamily: token.fontFamilyCode,
-            fontSize: 20,
-            fontWeight: 700,
-          }}>
-          graduate me
-        </Typography.Text>
-        <Typography.Text style={{ color: adminNavigation.muted, fontSize: 12 }}>
-          ADMIN / 학습 운영
-        </Typography.Text>
-      </div>
-      <Menu
-        theme='dark'
-        mode='inline'
-        selectedKeys={[selected]}
-        items={items}
-      />
-      <div className='mt-auto px-2 pt-8'>
-        <Divider
-          style={{ borderColor: token.colorBorder, margin: '0 0 16px' }}
-        />
-        <Typography.Paragraph
-          style={{ color: token.colorWhite, fontSize: 12, marginBottom: 4 }}>
-          {access.user.name || access.user.email} ·{' '}
-          {access.role === 'admin'
-            ? '운영 관리자'
-            : access.role === 'helper'
-              ? '학과 답변 도우미'
-              : '수업 운영'}
-        </Typography.Paragraph>
-        <Typography.Text style={{ color: adminNavigation.muted, fontSize: 12 }}>
-          {access.role === 'admin'
-            ? '운영 권한'
-            : !access.role
-              ? '수업별 역할에 따라 관리'
-              : `${access.languages.map((l) => (l === 'en' ? '영어' : l === 'th' ? '태국어' : l)).join(', ')} · 배정 자료 ${access.materialIds.length}개`}
-        </Typography.Text>
-      </div>
-    </nav>
+      header={
+        <div className='p-3'>
+          <Heading level={3}>graduate me</Heading>
+          <Text color='secondary'>학습 운영 콘솔</Text>
+        </div>
+      }
+      footer={
+        <div className='p-3'>
+          <Text>{access.user.name || access.user.email}</Text>
+          <Text
+            as='p'
+            color='secondary'>
+            {access.role === 'admin' ? '운영 관리자' : '학과 답변 도우미'}
+          </Text>
+        </div>
+      }>
+      <SideNavSection title='운영 관리'>
+        {access.role === 'admin' &&
+          links.map(({ path, label, icon }) => (
+            <SideNavItem
+              key={path}
+              href={path}
+              label={label}
+              isSelected={
+                path === '/' ? pathname === '/' : pathname.startsWith(path)
+              }
+              icon={
+                <SidebarIcon
+                  name={icon}
+                  selected={pathname === path}
+                />
+              }
+              onClick={(event) => {
+                if (
+                  !event.metaKey &&
+                  !event.ctrlKey &&
+                  !event.shiftKey &&
+                  !event.altKey
+                ) {
+                  event.preventDefault();
+                  void navigate({ to: path });
+                }
+              }}
+            />
+          ))}
+      </SideNavSection>
+    </SideNav>
   );
 }

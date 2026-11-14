@@ -1,7 +1,14 @@
+import { Button } from '@astryxdesign/core/Button';
+import { SegmentedControlItem } from '@astryxdesign/core/SegmentedControl';
+import { SegmentedControl } from '@astryxdesign/core/SegmentedControl';
+import { Text } from '@astryxdesign/core/Text';
+import { Card } from '@astryxdesign/core/Card';
+import { Stack } from '@astryxdesign/core/Stack';
+import { Heading } from '@astryxdesign/core/Heading';
+import { Metric } from '@/components/ui/Metric';
 import { useIsFetching, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, Link, redirect } from '@tanstack/react-router';
 import type { SearchSchemaInput } from '@tanstack/react-router';
-import { Button, Card, Segmented, Space, Statistic, Typography } from 'antd';
 import { z } from 'zod';
 import { usageQuery } from '@/domains/operations/api/operations';
 import {
@@ -120,33 +127,44 @@ function Overview() {
         description='처리할 업무부터 AI 실행과 새 자료까지 한곳에서 확인합니다.'
         action={
           <Button
-            loading={fetching > 0}
+            isLoading={fetching > 0}
             onClick={() =>
               void client.invalidateQueries({ queryKey: ['workspace'] })
-            }>
-            집계 갱신
-          </Button>
+            }
+            variant='secondary'
+            label='집계 갱신'
+          />
         }
       />
       <div className='flex flex-wrap items-center justify-between gap-3'>
-        <Segmented<z.infer<typeof searchSchema>['period']>
+        <SegmentedControl
           aria-label='집계 기간'
           value={period}
-          options={[
-            { value: 'all', label: '전체 기간' },
-            { value: '7', label: '최근 7일' },
-            { value: '30', label: '최근 30일' },
-          ]}
           onChange={(value) =>
             void navigate({
-              search: (previous) => ({ ...previous, period: value }),
+              search: (previous) => ({
+                ...previous,
+                period: searchSchema.shape.period.parse(value),
+              }),
               replace: true,
             })
           }
-        />
-        <Typography.Text type='secondary'>
+          label='표시 조건'>
+          {[
+            { value: 'all', label: '전체 기간' },
+            { value: '7', label: '최근 7일' },
+            { value: '30', label: '최근 30일' },
+          ].map((item) => (
+            <SegmentedControlItem
+              key={item.value}
+              value={item.value}
+              label={item.label}
+            />
+          ))}
+        </SegmentedControl>
+        <Text color='secondary'>
           선택 기간에 생성된 기록의 현재 상태를 집계합니다.
-        </Typography.Text>
+        </Text>
       </div>
       {error && (
         <QueryError
@@ -160,8 +178,10 @@ function Overview() {
       )}
       <div className='grid grid-cols-2 gap-5 xl:grid-cols-4'>
         {counts.map(({ title, value, loading: pending, link }) => (
-          <Card key={title}>
-            <Statistic
+          <Card
+            key={title}
+            padding={5}>
+            <Metric
               title={title}
               value={value}
               loading={pending}
@@ -172,23 +192,33 @@ function Overview() {
         ))}
       </div>
       <div className='flex flex-wrap items-center justify-between gap-3'>
-        <Segmented<z.infer<typeof searchSchema>['kind']>
+        <SegmentedControl
           aria-label='업무 종류'
           value={kind}
-          options={[
+          onChange={(value) =>
+            void navigate({
+              search: (previous) => ({
+                ...previous,
+                kind: searchSchema.shape.kind.parse(value),
+              }),
+              replace: true,
+            })
+          }
+          label='표시 조건'>
+          {[
             { value: 'all', label: '전체 업무' },
             { value: 'failed', label: '처리 실패' },
             { value: 'community', label: '게시물 신고' },
             { value: 'review', label: '검토 요청' },
             { value: 'question', label: '미답변 기록' },
-          ]}
-          onChange={(value) =>
-            void navigate({
-              search: (previous) => ({ ...previous, kind: value }),
-              replace: true,
-            })
-          }
-        />
+          ].map((item) => (
+            <SegmentedControlItem
+              key={item.value}
+              value={item.value}
+              label={item.label}
+            />
+          ))}
+        </SegmentedControl>
         <Link
           to='/questions'
           search={{ period, status: 'waiting' }}>
@@ -206,10 +236,11 @@ function Overview() {
         <OverviewAI period={period} />
         <OverviewMaterials period={period} />
       </div>
-      <Card title='다른 운영 업무'>
-        <Space
-          size='large'
-          wrap>
+      <Card padding={5}>
+        <Heading level={3}>{'다른 운영 업무'}</Heading>
+        <Stack
+          direction='horizontal'
+          gap={2}>
           <Link
             to='/materials'
             search={{ period }}>
@@ -222,7 +253,7 @@ function Overview() {
             search={{ period }}>
             운영 이력 확인
           </Link>
-        </Space>
+        </Stack>
       </Card>
     </section>
   );

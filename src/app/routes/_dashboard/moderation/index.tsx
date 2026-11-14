@@ -1,7 +1,10 @@
+import { Button } from '@astryxdesign/core/Button';
+import { Badge } from '@astryxdesign/core/Badge';
+import { Banner } from '@astryxdesign/core/Banner';
+import { DataTable } from '@/components/ui/DataTable';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, redirect } from '@tanstack/react-router';
-import { Alert, Button, Table, Tag } from 'antd';
 import { communityReportsQuery } from '@/domains/operations/api/moderation';
 import type { CommunityReport } from '@/domains/operations/model/moderation';
 import { formatDate } from '@/domains/questions/lib/format';
@@ -54,7 +57,7 @@ function Moderation() {
           { value: 'dismissed', label: '반려' },
         ]}
       />
-      <Table
+      <DataTable
         rowKey='id'
         loading={query.isPending}
         dataSource={query.data?.items ?? []}
@@ -71,10 +74,10 @@ function Moderation() {
             title: '신고 게시물',
             render: (_, item) => (
               <Button
-                type='link'
-                onClick={() => setSelected(item)}>
-                {item.post.title}
-              </Button>
+                onClick={() => setSelected(item)}
+                variant='ghost'
+                label={item.post.title}
+              />
             ),
           },
           { title: '신고 사유', dataIndex: 'reason', ellipsis: true },
@@ -86,35 +89,42 @@ function Moderation() {
             title: '처리 상태',
             dataIndex: 'status',
             render: (status) => (
-              <Tag
-                color={
+              <Badge
+                variant={
                   status === 'open'
                     ? 'orange'
                     : status === 'resolved'
                       ? 'green'
                       : undefined
-                }>
-                {status === 'open'
-                  ? '접수'
-                  : status === 'resolved'
-                    ? '조치 완료'
-                    : '반려'}
-              </Tag>
+                }
+                label={
+                  <>
+                    {status === 'open'
+                      ? '접수'
+                      : status === 'resolved'
+                        ? '조치 완료'
+                        : '반려'}
+                  </>
+                }
+              />
             ),
           },
           {
             title: '게시물 노출',
             render: (_, item) => (
-              <Tag color={item.post.hiddenAt ? 'red' : undefined}>
-                {item.post.hiddenAt ? '숨김' : '기존 공개 범위 유지'}
-              </Tag>
+              <Badge
+                variant={item.post.hiddenAt ? 'red' : undefined}
+                label={
+                  <>{item.post.hiddenAt ? '숨김' : '기존 공개 범위 유지'}</>
+                }
+              />
             ),
           },
           { title: '접수일', dataIndex: 'createdAt', render: formatDate },
         ]}
       />
-      <Alert
-        type='info'
+      <Banner
+        status='info'
         title='학습 자료·AI 설명·문제 오류는 신고 · 수정 요청 메뉴에서 처리합니다.'
         description='게시물 신고 조치는 원본 자료의 공개 권한과 개인 학습 기록을 바꾸지 않습니다.'
       />

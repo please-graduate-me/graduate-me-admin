@@ -1,6 +1,13 @@
+import { Text } from '@astryxdesign/core/Text';
+import { Heading } from '@astryxdesign/core/Heading';
+import { Banner } from '@astryxdesign/core/Banner';
+import { TextInput } from '@astryxdesign/core/TextInput';
+import { Button } from '@astryxdesign/core/Button';
+import { Card } from '@astryxdesign/core/Card';
+import Form from 'rc-field-form';
+import { FormField } from '@/components/ui/FormField';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFileRoute, Navigate } from '@tanstack/react-router';
-import { Alert, Button, Card, Form, Input, Typography } from 'antd';
 import { accessQuery, login, authStatusQuery } from '@/domains/auth/api/auth';
 
 /** 운영 콘솔은 일반 사용자 로그인과 독립된 아이디·비밀번호로만 진입한다. */
@@ -32,58 +39,65 @@ function Login() {
 
   return (
     <main className='flex min-h-dvh items-center justify-center p-10'>
-      <Card className='w-[480px]'>
-        <Typography.Text type='secondary'>graduate me / admin</Typography.Text>
-        <Typography.Title level={2}>운영자 로그인</Typography.Title>
-        <Typography.Paragraph type='secondary'>
+      <Card
+        className='w-[480px]'
+        padding={5}>
+        <Text color='secondary'>graduate me / admin</Text>
+        <Heading level={2}>운영자 로그인</Heading>
+        <Text
+          as='p'
+          color='secondary'>
           운영자 아이디와 비밀번호를 입력해 주세요. 일반 사용자와 조교는 서비스
           웹을 이용합니다.
-        </Typography.Paragraph>
+        </Text>
         {status.data && !status.data.configured && (
-          <Alert
-            type='info'
+          <Banner
+            status='info'
             title='운영자 인증 설정이 필요합니다.'
             className='mb-4!'
           />
         )}
         {(status.error || signin.error) && (
-          <Alert
-            type='error'
+          <Banner
+            status='error'
             title={(status.error || signin.error)?.message}
             className='mb-4!'
           />
         )}
-        <Form
-          layout='vertical'
-          onFinish={(values) => signin.mutate(values)}>
-          <Form.Item
+        <Form onFinish={(values) => signin.mutate(values)}>
+          <FormField
             name='username'
             label='관리자 아이디'
             rules={[{ required: true, message: '아이디를 입력해 주세요.' }]}>
-            <Input
+            <TextInput
               autoComplete='username'
-              maxLength={128}
-              disabled={signin.isPending}
+              isDisabled={signin.isPending}
+              label='입력'
+              isLabelHidden
+              value={''}
             />
-          </Form.Item>
-          <Form.Item
+          </FormField>
+          <FormField
             name='password'
             label='비밀번호'
             rules={[{ required: true, message: '비밀번호를 입력해 주세요.' }]}>
-            <Input.Password
+            <TextInput
               autoComplete='current-password'
-              maxLength={256}
-              disabled={signin.isPending}
+              isDisabled={signin.isPending}
+              type='password'
+              label='입력'
+              isLabelHidden
+              value={''}
             />
-          </Form.Item>
+          </FormField>
           <Button
-            type='primary'
-            htmlType='submit'
-            block
-            loading={signin.isPending}
-            disabled={!status.data?.configured}>
-            로그인
-          </Button>
+            type='submit'
+            isLoading={signin.isPending}
+            isDisabled={!status.data?.configured}
+            variant='primary'
+            width='100%'
+            label='로그인'
+          />
         </Form>
       </Card>
     </main>

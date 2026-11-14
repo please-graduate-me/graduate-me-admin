@@ -1,4 +1,5 @@
-import { Alert, Button } from 'antd';
+import { Banner } from '@astryxdesign/core/Banner';
+import { Button } from '@astryxdesign/core/Button';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from '@tanstack/react-router';
 import { ApiError } from '@/lib/api/request';
@@ -16,20 +17,20 @@ export function QueryError({
   const expired = error instanceof ApiError && error.status === 401;
 
   return (
-    <Alert
-      type='error'
-      showIcon
+    <Banner
+      status='error'
       title={error.message}
-      action={
+      endContent={
         <Button
           onClick={() => {
             if (expired) {
               client.clear();
               void router.navigate({ to: '/login' });
             } else retry();
-          }}>
-          {expired ? '다시 로그인' : '다시 불러오기'}
-        </Button>
+          }}
+          variant='secondary'
+          label={expired ? '다시 로그인' : '다시 불러오기'}
+        />
       }
     />
   );

@@ -1,6 +1,7 @@
+import { Tab } from '@astryxdesign/core/TabList';
+import { TabList } from '@astryxdesign/core/TabList';
 import { createFileRoute, redirect } from '@tanstack/react-router';
 import type { SearchSchemaInput } from '@tanstack/react-router';
-import { Tabs } from 'antd';
 import { PageHeading } from './-components/PageHeading';
 import { parseListSearch, type ListSearch } from './-components/listSearch';
 import { AIUsageLedger } from './usage/-components/AIUsageLedger';
@@ -59,8 +60,8 @@ function Usage() {
         title='AI 사용량 · 처리 이력'
         description='공급자별 실제 요청·토큰·응답 시간과 자료 준비 상태를 확인합니다.'
       />
-      <Tabs
-        activeKey={search.view}
+      <TabList
+        value={search.view}
         onChange={(view) =>
           void navigate({
             search: (previous) => ({
@@ -72,37 +73,36 @@ function Usage() {
             }),
             replace: true,
           })
-        }
-        items={[
-          {
-            key: 'ai',
-            label: 'AI 실행 기록',
-            children: (
-              <AIUsageLedger
-                search={search}
-                provider={search.provider}
-                onChange={change}
-                onProvider={(provider) =>
-                  void navigate({
-                    search: (previous) => ({ ...previous, provider, page: 1 }),
-                    replace: true,
-                  })
-                }
-              />
-            ),
-          },
-          {
-            key: 'jobs',
-            label: '영상 준비 큐',
-            children: (
-              <ProcessingJobs
-                search={search}
-                onChange={change}
-              />
-            ),
-          },
-        ]}
-      />
+        }>
+        {[
+          { key: 'ai', label: 'AI 실행 기록' },
+          { key: 'jobs', label: '영상 준비 큐' },
+        ].map((item) => (
+          <Tab
+            key={item.key}
+            value={item.key}
+            label={item.label}
+          />
+        ))}
+      </TabList>
+      {search.view === 'jobs' ? (
+        <ProcessingJobs
+          search={search}
+          onChange={change}
+        />
+      ) : (
+        <AIUsageLedger
+          search={search}
+          provider={search.provider}
+          onChange={change}
+          onProvider={(provider) =>
+            void navigate({
+              search: (previous) => ({ ...previous, provider, page: 1 }),
+              replace: true,
+            })
+          }
+        />
+      )}
     </section>
   );
 }

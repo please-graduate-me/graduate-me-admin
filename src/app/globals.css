@@ -1,6 +1,10 @@
-@layer theme, base, antd, components, utilities;
+@layer reset, theme, base, astryx-base, astryx-theme, components, utilities;
 
 @import 'tailwindcss';
+@import '@astryxdesign/core/reset.css';
+@import '@astryxdesign/core/astryx.css';
+@import '@astryxdesign/theme-neutral/theme.css';
+@import '@astryxdesign/core/tailwind-theme.css';
 
 @font-face {
   font-family: 'Noto Sans KR';
@@ -37,7 +41,16 @@
 @layer base {
   body {
     margin: 0;
-    min-width: 1200px;
+    min-width: 360px;
+    background: var(--color-background-body);
+    color: var(--color-text-primary);
     font-family: 'Noto Sans KR', system-ui, sans-serif;
+  }
+}
+
+@layer astryx-theme {
+  :root,
+  [data-astryx-theme='neutral'] {
+    --font-family-body: 'Noto Sans KR', system-ui, sans-serif;
   }
 }

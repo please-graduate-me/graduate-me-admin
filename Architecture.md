@@ -14,7 +14,6 @@ src/
     router.ts                     # 라우터 생성과 QueryClient 연결
     queryClient.ts                # 앱 공통 캐시·재시도 정책
     routeTree.gen.ts              # 자동 생성되는 라우트 연결 정보
-    theme.ts                      # Ant Design 공통 테마 토큰
     globals.css                   # Tailwind 진입점·전역 초기화
     routes/
       __root.tsx                  # 모든 화면의 공통 루트
@@ -34,11 +33,11 @@ src/
 nginx/                            # 정적 파일·API 프록시 설정
 ```
 
-위 구조는 코드 배치 기준이다. TanStack Router, TanStack Query, Ant Design을 연결한 대시보드 초기 화면을 제공한다. 라우트 생성 설정은 루트의 `tsr.config.json`에서 공유하며, 개발 중에는 Vite 플러그인으로, 타입 검사·테스트 전에는 `pnpm routes:generate`로 갱신한다. `components/ui/`는 예약 위치이며 미리 생성하지 않는다. 필요한 코드가 생길 때만 폴더를 만들고, 별도 `pages/`, `features/`, 최상위 `hooks/`, `utils/` 같은 병렬 분류를 추가하지 않는다.
+위 구조는 코드 배치 기준이다. TanStack Router, TanStack Query, Astryx을 연결한 대시보드 초기 화면을 제공한다. 라우트 생성 설정은 루트의 `tsr.config.json`에서 공유하며, 개발 중에는 Vite 플러그인으로, 타입 검사·테스트 전에는 `pnpm routes:generate`로 갱신한다. `components/ui/`는 예약 위치이며 미리 생성하지 않는다. 필요한 코드가 생길 때만 폴더를 만들고, 별도 `pages/`, `features/`, 최상위 `hooks/`, `utils/` 같은 병렬 분류를 추가하지 않는다.
 
 ## 위치 결정 순서
 
-UI는 먼저 아래 Ant Design 사용 규칙에 따라 기존 컴포넌트로 충족할 수 있는지 확인한다. 자체 코드가 필요한 경우 실제 사용처를 검색한다. 테스트는 사용처 수에 포함하지 않는다. 아래에서 처음 해당하는 위치를 선택한다.
+UI는 먼저 아래 Astryx 사용 규칙에 따라 기존 컴포넌트로 충족할 수 있는지 확인한다. 자체 코드가 필요한 경우 실제 사용처를 검색한다. 테스트는 사용처 수에 포함하지 않는다. 아래에서 처음 해당하는 위치를 선택한다.
 
 1. **라우트 정의·경로 매개변수와 검색 조건 검증·진입 조건·화면 조립**은 해당 `src/app/routes/`의 라우트 파일에 둔다.
 2. **API 요청·외부 데이터 계약·Query 설정**은 해당 도메인의 `api/`, `model/`에 둔다. queryKey와 queryOptions, 데이터 변경 훅과 관련 캐시 무효화도 해당 도메인의 `api/`에서 관리한다.
@@ -95,21 +94,21 @@ UI는 먼저 아래 Ant Design 사용 규칙에 따라 기존 컴포넌트로 �
 - 테스트는 해당 소스 옆에 둔다. 라우트 옆의 테스트 등 화면이 아닌 파일은 라우트 생성 대상에서 제외되도록 설정한다.
 - 일반 소스의 export와 비자명한 로직 주석은 `AGENTS.md`의 주석 규칙을 따른다. 자동 생성 파일에 주석을 수동으로 추가하지 않는다.
 
-## Ant Design 사용 규칙
+## Astryx 사용 규칙
 
-- 기본 UI는 Ant Design을 사용한다. Button·Input·Select·Form·Table·Modal·Menu·Layout 등 필요한 UI가 공식 컴포넌트와 예제에 있는지 먼저 확인한다. props·컴포넌트 조합·테마 토큰으로 요구사항을 충족할 수 있으면 이를 사용한다.
-- 기본 컴포넌트는 `antd`에서 직접 import한다. 단순 재내보내기, props 전달, 기본 색상·크기 지정만을 위한 Button·Input 등의 래퍼를 만들지 않는다. 향후 라이브러리 교체 가능성만을 이유로 추상화하지 않는다.
-- 검색·정렬·페이지 이동·입력 검증·로딩·빈 상태 등 Ant Design이 제공하는 UI 기능은 공식 API를 우선 활용하고 같은 기능을 다시 구현하지 않는다. 데이터 조회·변경과 업무 검증은 기존 앱·도메인 책임을 유지한다.
-- 화면 전용 조합과 사용자 동작은 해당 라우트의 `-components/`에 둔다. 업무 표시 UI는 위치 결정 순서에 따라 배치한다. Ant Design을 사용한다는 이유만으로 `components/ui/`로 옮기지 않는다.
-- `components/ui/`는 Ant Design의 공식 API와 조합으로 충족되지 않는 요구 또는 여러 도메인 화면에서 실제 반복되는 서비스 공통 UI 조합이 있을 때만 생성한다. 새 자체 UI나 래퍼를 추가할 때는 기존 컴포넌트로 충족되지 않는 요구 또는 추출할 반복 책임을 작업 설명에 명시한다. 별도 승인을 요구하지 않는다.
+- 기본 UI는 Astryx을 사용한다. Button·TextInput·Selector·Field·Table·Dialog·SideNav·AppShell 등 필요한 UI가 공식 컴포넌트와 예제에 있는지 먼저 확인한다. props·컴포넌트 조합·테마 토큰으로 요구사항을 충족할 수 있으면 이를 사용한다.
+- 기본 컴포넌트는 `@astryxdesign/core/<컴포넌트>`에서 직접 import한다. 단순 재내보내기, props 전달, 기본 색상·크기 지정만을 위한 Button·Input 등의 래퍼를 만들지 않는다. 향후 라이브러리 교체 가능성만을 이유로 추상화하지 않는다.
+- 검색·정렬·페이지 이동·입력 검증·로딩·빈 상태 등 Astryx이 제공하는 UI 기능은 공식 API를 우선 활용하고 같은 기능을 다시 구현하지 않는다. 데이터 조회·변경과 업무 검증은 기존 앱·도메인 책임을 유지한다.
+- 화면 전용 조합과 사용자 동작은 해당 라우트의 `-components/`에 둔다. 업무 표시 UI는 위치 결정 순서에 따라 배치한다. Astryx을 사용한다는 이유만으로 `components/ui/`로 옮기지 않는다.
+- `components/ui/`는 Astryx의 공식 API와 조합으로 충족되지 않는 요구 또는 여러 도메인 화면에서 실제 반복되는 서비스 공통 UI 조합이 있을 때만 생성한다. 새 자체 UI나 래퍼를 추가할 때는 기존 컴포넌트로 충족되지 않는 요구 또는 추출할 반복 책임을 작업 설명에 명시한다. 별도 승인을 요구하지 않는다.
 
 ## 스타일
 
-- Ant Design 컴포넌트 외형은 `ConfigProvider`의 공통 토큰과 컴포넌트별 토큰을 우선 사용한다. 공통 테마 설정은 `src/app/theme.ts`에 두고 앱 초기화에서 적용한다. 개별 사용처 차이는 컴포넌트 props와 공식 스타일 API로 조정한다.
-- Tailwind CSS와 공식 Vite 플러그인은 화면 배치·간격·반응형 구성에 사용한다. Ant Design의 버튼·입력창 등 기본 외형을 Tailwind로 다시 구현하지 않는다.
-- 색상·글꼴 등의 공통 디자인 값은 Ant Design 테마를 기준으로 관리한다. Tailwind에서도 같은 값이 필요하면 도입한 버전의 공식 토큰·CSS 변수 연동 방법을 사용하고 `@theme`에 독립된 중복 값을 관리하지 않는다.
+- Astryx 컴포넌트 외형은 Astryx 테마 토큰과 컴포넌트 props을 우선 사용한다. 테마 Provider는 `src/app/App.tsx`에 연결하고 테마 변수는 `src/app/globals.css`에서 관리한다. 개별 사용처 차이는 컴포넌트 props와 공식 스타일 API로 조정한다.
+- Tailwind CSS와 공식 Vite 플러그인은 화면 배치·간격·반응형 구성에 사용한다. Astryx의 버튼·입력창 등 기본 외형을 Tailwind로 다시 구현하지 않는다.
+- 색상·글꼴 등의 공통 디자인 값은 Astryx 테마를 기준으로 관리한다. Tailwind에서도 같은 값이 필요하면 도입한 버전의 공식 토큰·CSS 변수 연동 방법을 사용하고 `@theme`에 독립된 중복 값을 관리하지 않는다.
 - Tailwind 진입점과 전역 초기화는 `src/app/globals.css`에 둔다. 전역 초기화는 `@layer base`에 필요한 범위만 작성한다. 클래스 순서는 Prettier의 Tailwind 플러그인으로 정렬한다.
-- 반복되는 서비스 UI 조합은 실제 사용처에 따라 컴포넌트로 분리한다. 다른 컴포넌트 내부 스타일이나 `.ant-*` 내부 선택자를 전역 CSS로 덮어쓰지 않는다.
+- 반복되는 서비스 UI 조합은 실제 사용처에 따라 컴포넌트로 분리한다. 다른 컴포넌트 내부 스타일이나 `.xds-*` 내부 선택자를 전역 CSS로 덮어쓰지 않는다.
 
 ## 실행과 서버 경계
 
@@ -117,3 +116,9 @@ UI는 먼저 아래 Ant Design 사용 규칙에 따라 기존 컴포넌트로 �
 - 운영 이미지는 정적 빌드 결과를 Nginx로 제공한다. Vite 개발 서버를 운영 서버로 사용하지 않는다.
 - 브라우저는 `/api`로 요청한다. 개발은 Vite, 운영은 Nginx가 백엔드로 전달한다.
 - 인증과 관리자 권한·데이터 변경은 백엔드가 판정한다. 앱 저장소를 분리해도 인증 정책이 자동으로 분리되지는 않는다.
+
+## 반복 관리 UI 조합
+
+- `FormField`는 UI 없는 `rc-field-form`의 기존 비동기·필드 의존 검증을 Astryx 입력의 label·description·status와 연결한다. 기본 입력 부품은 직접 import한다.
+- `DataTable`은 여러 운영 목록의 서버·로컬 페이지 처리, 열별 업무 표시, 오류 상세 펼침을 Astryx Table·Pagination·Button으로 조합한다.
+- `Metric`은 운영 집계의 로딩·미확인 값·단위를 Astryx Text·Heading·Skeleton으로 표시한다.

@@ -1,6 +1,12 @@
+import { EmptyState } from '@astryxdesign/core/EmptyState';
+import { Text } from '@astryxdesign/core/Text';
+import { Badge } from '@astryxdesign/core/Badge';
+import { Banner } from '@astryxdesign/core/Banner';
+import { Heading } from '@astryxdesign/core/Heading';
+import { Card } from '@astryxdesign/core/Card';
+import { DataTable } from '@/components/ui/DataTable';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link, redirect } from '@tanstack/react-router';
-import { Alert, Card, Empty, Table, Tag, Typography } from 'antd';
 import { eventListQuery } from '@/domains/questions/api/questions';
 import { eventLabels } from '@/domains/questions/config/events';
 import { formatDate } from '@/domains/questions/lib/format';
@@ -49,17 +55,12 @@ function Events() {
           { value: 'internal', label: 'admin 내부' },
         ]}
       />
-      <Table
+      <DataTable
         rowKey='id'
         loading={query.isPending}
         dataSource={items}
         locale={{
-          emptyText: (
-            <Empty
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description='조회할 검토 · 변경 이력이 없습니다.'
-            />
-          ),
+          emptyText: <EmptyState title='조회할 검토 · 변경 이력이 없습니다.' />,
         }}
         pagination={{
           current: search.page,
@@ -84,11 +85,12 @@ function Events() {
                 ) : (
                   eventLabels[item.action] || '운영 기록'
                 )}
-                <Typography.Paragraph
-                  type='secondary'
-                  className='mt-1! mb-0!'>
+                <Text
+                  className='mt-1! mb-0!'
+                  as='p'
+                  color='secondary'>
                   {item.detail}
-                </Typography.Paragraph>
+                </Text>
               </div>
             ),
           },
@@ -106,25 +108,29 @@ function Events() {
             title: '공개 범위',
             dataIndex: 'visibility',
             render: (value) => (
-              <Tag
-                bordered={false}
-                color={value === 'public' ? 'blue' : undefined}>
-                {value === 'public' ? '학생에게 공개' : 'admin 내부'}
-              </Tag>
+              <Badge
+                variant={value === 'public' ? 'blue' : undefined}
+                label={
+                  <>{value === 'public' ? '학생에게 공개' : 'admin 내부'}</>
+                }
+              />
             ),
           },
           { title: '일시', dataIndex: 'createdAt', render: formatDate },
         ]}
       />
-      <Alert
-        type='info'
+      <Banner
+        status='info'
         title='내부 메모와 업무 배정·운영 기록은 admin에서만 조회합니다. 학생은 게시된 답변과 공개된 수정 결과만 확인합니다.'
       />
-      <Card title='검토 범위와 과거 기록'>
-        <Typography.Paragraph className='mb-0!'>
+      <Card padding={5}>
+        <Heading level={3}>{'검토 범위와 과거 기록'}</Heading>
+        <Text
+          className='mb-0!'
+          as='p'>
           수정 대상은 구절·설명·문제와 버전으로 구분합니다. 검토 요청에 대한
           조치 기록이 원문이나 생성 문제의 변경을 의미하지는 않습니다.
-        </Typography.Paragraph>
+        </Text>
       </Card>
     </section>
   );

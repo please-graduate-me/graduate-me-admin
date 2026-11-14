@@ -1,16 +1,15 @@
+import { Button } from '@astryxdesign/core/Button';
+import { EmptyState } from '@astryxdesign/core/EmptyState';
+import { Stack } from '@astryxdesign/core/Stack';
+import { Badge } from '@astryxdesign/core/Badge';
+import { Banner } from '@astryxdesign/core/Banner';
+import { Text } from '@astryxdesign/core/Text';
+import { Heading } from '@astryxdesign/core/Heading';
+import { Card } from '@astryxdesign/core/Card';
+import { DataTable } from '@/components/ui/DataTable';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, redirect } from '@tanstack/react-router';
-import {
-  Alert,
-  Button,
-  Card,
-  Empty,
-  Space,
-  Table,
-  Tag,
-  Typography,
-} from 'antd';
 import { MaterialRegistration } from './materials/-components/MaterialRegistration';
 import { MaterialAccessEditor } from './materials/-components/MaterialAccessEditor';
 import { MaterialOcrPanel } from './materials/-components/MaterialOcrPanel';
@@ -52,10 +51,10 @@ function Materials() {
         description='PDF·영상 자료 전체에서 준비 상태와 접근 범위를 확인합니다.'
         action={
           <Button
-            type='primary'
-            onClick={() => setRegistrationOpen(true)}>
-            학습 자료 등록
-          </Button>
+            onClick={() => setRegistrationOpen(true)}
+            variant='primary'
+            label='학습 자료 등록'
+          />
         }
       />
       {registrationOpen && (
@@ -77,17 +76,12 @@ function Materials() {
           { value: 'video', label: '영상 자료' },
         ]}
       />
-      <Table
+      <DataTable<AdminMaterial>
         rowKey='id'
         dataSource={items}
         loading={query.isPending}
         locale={{
-          emptyText: (
-            <Empty
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description='등록된 자료가 없습니다.'
-            />
-          ),
+          emptyText: <EmptyState title='등록된 자료가 없습니다.' />,
         }}
         pagination={{
           current: search.page,
@@ -100,22 +94,30 @@ function Materials() {
           {
             title: '관리',
             key: 'access',
-            render: (_, item) => (
-              <Space>
-                <Button onClick={() => setEditing(item)}>접근 범위</Button>
+            render: (_: undefined, item: AdminMaterial) => (
+              <Stack
+                direction='horizontal'
+                gap={2}>
+                <Button
+                  onClick={() => setEditing(item)}
+                  variant='secondary'
+                  label='접근 범위'
+                />
                 {item.kind === 'pdf' && item.owner?.id === access.user.id && (
-                  <Button onClick={() => setRecognizing(item)}>
-                    글자 인식
-                  </Button>
+                  <Button
+                    onClick={() => setRecognizing(item)}
+                    variant='secondary'
+                    label='글자 인식'
+                  />
                 )}
-              </Space>
+              </Stack>
             ),
           },
           { title: '자료', dataIndex: 'title', width: '36%' },
           {
             title: '종류 · 분량',
             key: 'kind',
-            render: (_, item) =>
+            render: (_: undefined, item: AdminMaterial) =>
               item.kind === 'pdf'
                 ? `PDF · ${item.pageCount ?? 0}페이지`
                 : `영상 · ${item.duration === null ? '길이 미확인' : formatTime(item.duration)}`,
@@ -123,49 +125,57 @@ function Materials() {
           {
             title: '접근 범위',
             key: 'owner',
-            render: (_, item) =>
+            render: (_: undefined, item: AdminMaterial) =>
               `${item.visibility === 'public' ? '공용' : item.visibility === 'accounts' ? '지정 계정' : '비공개'}${item.owner ? ` · ${item.owner.name || '이름 없음'}` : ''}`,
           },
           {
             title: '처리 상태',
             dataIndex: 'status',
             render: (status: string) => (
-              <Tag
-                color={
+              <Badge
+                variant={
                   status.toLowerCase() === 'failed'
                     ? 'red'
                     : status.toLowerCase() === 'ready'
                       ? 'green'
                       : 'blue'
                 }
-                bordered={false}>
-                {(
-                  {
-                    ready: '준비 완료',
-                    pending: '대기 중',
-                    processing: '처리 중',
-                    queued: '대기 중',
-                    preparing: '자료 준비 중',
-                    transcribing: '전사 중',
-                    failed: '처리 실패',
-                  } as Record<string, string>
-                )[status.toLowerCase()] || status}
-              </Tag>
+                label={
+                  <>
+                    {(
+                      {
+                        ready: '준비 완료',
+                        pending: '대기 중',
+                        processing: '처리 중',
+                        queued: '대기 중',
+                        preparing: '자료 준비 중',
+                        transcribing: '전사 중',
+                        failed: '처리 실패',
+                      } as Record<string, string>
+                    )[status.toLowerCase()] || status}
+                  </>
+                }
+              />
             ),
           },
           { title: '등록일', dataIndex: 'createdAt', render: formatDate },
         ]}
       />
-      <Alert
-        type='warning'
+      <Banner
+        status='warning'
         title='영상 분석 실패 자료에는 자동·수동 재시도를 제공하지 않습니다. 저장된 정상 결과와 개인 기록은 계속 이용할 수 있습니다.'
       />
-      <Card title='자료의 공개 범위와 도우미 배정은 별개입니다'>
-        <Typography.Paragraph className='mb-0!'>
+      <Card padding={5}>
+        <Heading level={3}>
+          {'자료의 공개 범위와 도우미 배정은 별개입니다'}
+        </Heading>
+        <Text
+          className='mb-0!'
+          as='p'>
           이 목록은 PDF 원본·개인 메모를 제공하지 않습니다. 도우미에게 자료를
           배정해도 해당 학생의 전체 학습 기록이나 비공개 원본이 공개되지
           않습니다.
-        </Typography.Paragraph>
+        </Text>
       </Card>
       {editing && (
         <MaterialAccessEditor

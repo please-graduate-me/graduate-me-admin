@@ -1,7 +1,12 @@
+import { SegmentedControlItem } from '@astryxdesign/core/SegmentedControl';
+import { SegmentedControl } from '@astryxdesign/core/SegmentedControl';
+import { EmptyState } from '@astryxdesign/core/EmptyState';
+import { Badge } from '@astryxdesign/core/Badge';
+import { Banner } from '@astryxdesign/core/Banner';
+import { DataTable } from '@/components/ui/DataTable';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, Link, redirect } from '@tanstack/react-router';
 import type { SearchSchemaInput } from '@tanstack/react-router';
-import { Alert, Empty, Segmented, Table, Tag } from 'antd';
 import { reviewListQuery } from '@/domains/questions/api/questions';
 import { formatDate, sourceLabel } from '@/domains/questions/lib/format';
 import { PageHeading } from '../-components/PageHeading';
@@ -12,7 +17,9 @@ import { parseListSearch, type ListSearch } from '../-components/listSearch';
 /** 운영자에게 근거와 버전이 명시된 검토 요청 목록을 제공한다. */
 export const Route = createFileRoute('/_dashboard/reviews/')({
   validateSearch: (
-    raw: Partial<ListSearch> & { kind?: string } & SearchSchemaInput
+    raw: Partial<ListSearch> & {
+      kind?: string;
+    } & SearchSchemaInput
   ) => ({
     ...parseListSearch(raw),
     kind:
@@ -40,7 +47,7 @@ function Reviews() {
         title='신고 · 수정 요청'
         description='원문 근거와 변경 영향을 확인한 뒤 조치 사유를 기록합니다.'
       />
-      <Segmented
+      <SegmentedControl
         value={search.kind}
         onChange={(kind) =>
           void navigate({
@@ -52,12 +59,19 @@ function Reviews() {
             replace: true,
           })
         }
-        options={[
+        label='표시 조건'>
+        {[
           { value: 'all', label: '전체' },
           { value: 'report', label: '학생 오류 신고' },
           { value: 'review_request', label: '도우미 수정 요청' },
-        ]}
-      />
+        ].map((item) => (
+          <SegmentedControlItem
+            key={item.value}
+            value={item.value}
+            label={item.label}
+          />
+        ))}
+      </SegmentedControl>
       {query.error && (
         <QueryError
           error={query.error}
@@ -74,17 +88,12 @@ function Reviews() {
           { value: 'dismissed', label: '반려' },
         ]}
       />
-      <Table
+      <DataTable
         rowKey='id'
         dataSource={items}
         loading={query.isPending}
         locale={{
-          emptyText: (
-            <Empty
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description='접수된 검토 요청이 없습니다.'
-            />
-          ),
+          emptyText: <EmptyState title='접수된 검토 요청이 없습니다.' />,
         }}
         pagination={{
           current: search.page,
@@ -98,9 +107,14 @@ function Reviews() {
             title: '접수 종류',
             dataIndex: 'kind',
             render: (value) => (
-              <Tag color={value === 'report' ? 'red' : 'blue'}>
-                {value === 'report' ? '학생 오류 신고' : '도우미 수정 요청'}
-              </Tag>
+              <Badge
+                variant={value === 'report' ? 'red' : 'blue'}
+                label={
+                  <>
+                    {value === 'report' ? '학생 오류 신고' : '도우미 수정 요청'}
+                  </>
+                }
+              />
             ),
           },
           {
@@ -130,28 +144,31 @@ function Reviews() {
             title: '상태',
             dataIndex: 'status',
             render: (value) => (
-              <Tag
-                bordered={false}
-                color={
+              <Badge
+                variant={
                   value === 'open'
                     ? 'orange'
                     : value === 'resolved'
                       ? 'green'
                       : undefined
-                }>
-                {value === 'open'
-                  ? '검토 대기'
-                  : value === 'resolved'
-                    ? '검토 완료'
-                    : '반려'}
-              </Tag>
+                }
+                label={
+                  <>
+                    {value === 'open'
+                      ? '검토 대기'
+                      : value === 'resolved'
+                        ? '검토 완료'
+                        : '반려'}
+                  </>
+                }
+              />
             ),
           },
           { title: '접수', dataIndex: 'createdAt', render: formatDate },
         ]}
       />
-      <Alert
-        type='info'
+      <Banner
+        status='info'
         title='신고·수정 요청에서 공유된 원문과 결과를 열어 실제 버전 수정, 범위별 검토, 문제 노출 조치를 수행할 수 있습니다. 과거 답안의 정답과 근거는 보존됩니다.'
       />
     </section>

@@ -1,5 +1,10 @@
+import { Banner } from '@astryxdesign/core/Banner';
+import { EmptyState } from '@astryxdesign/core/EmptyState';
+import { Badge } from '@astryxdesign/core/Badge';
+import { Heading } from '@astryxdesign/core/Heading';
+import { Card } from '@astryxdesign/core/Card';
+import { DataTable } from '@/components/ui/DataTable';
 import { Link } from '@tanstack/react-router';
-import { Alert, Card, Empty, Table, Tag } from 'antd';
 import { formatDate } from '@/domains/questions/lib/format';
 import type { OverviewTask } from './buildOverviewTasks';
 
@@ -23,11 +28,11 @@ export function OverviewTasks({
   period: 'all' | '7' | '30';
 }) {
   return (
-    <Card title='확인할 업무'>
-      <Alert
+    <Card padding={5}>
+      <Heading level={3}>{'확인할 업무'}</Heading>
+      <Banner
         className='mb-4!'
-        type={incomplete ? 'warning' : 'info'}
-        showIcon
+        status={incomplete ? 'warning' : 'info'}
         title={
           incomplete
             ? '일부 업무를 불러오지 못했습니다. 표시된 목록이 전체가 아닐 수 있습니다.'
@@ -35,7 +40,7 @@ export function OverviewTasks({
         }
         description='선택 기간에 생성된 미처리 기록을 종류별 최근 20개까지 모았습니다. 전체 건수는 상단 카드에서, 전체 목록은 각 관리 화면에서 확인할 수 있습니다.'
       />
-      <Table
+      <DataTable
         rowKey='id'
         dataSource={tasks}
         loading={loading}
@@ -47,9 +52,8 @@ export function OverviewTasks({
         }}
         locale={{
           emptyText: (
-            <Empty
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description={
+            <EmptyState
+              title={
                 incomplete
                   ? '조회하지 못한 업무가 있습니다.'
                   : '현재 조건에서 확인할 업무가 없습니다.'
@@ -63,9 +67,10 @@ export function OverviewTasks({
             dataIndex: 'kind',
             width: 130,
             render: (kind: OverviewTask['kind']) => (
-              <Tag color={kind === 'failed' ? 'red' : 'orange'}>
-                {labels[kind]}
-              </Tag>
+              <Badge
+                variant={kind === 'failed' ? 'red' : 'orange'}
+                label={<>{labels[kind]}</>}
+              />
             ),
           },
           {

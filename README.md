@@ -1,6 +1,6 @@
 # graduate-me-admin
 
-graduate me의 관리자 웹을 관리하는 독립 저장소입니다. React, Vite, TypeScript, TanStack Router, TanStack Query, Ant Design을 사용하며 기존 NestJS API에 연결합니다.
+graduate me의 관리자 웹을 관리하는 독립 저장소입니다. React, Vite, TypeScript, TanStack Router, TanStack Query, Astryx와 Tailwind CSS을 사용하며 기존 NestJS API에 연결합니다.
 
 ## 프로젝트 문서
 
