@@ -97,6 +97,7 @@ function Reviews() {
           emptyText: <EmptyState title='접수된 검토 요청이 없습니다.' />,
         }}
         pagination={{
+          mode: 'server',
           current: search.page,
           pageSize: 20,
           total: query.data?.total ?? 0,

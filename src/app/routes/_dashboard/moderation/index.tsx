@@ -63,6 +63,7 @@ function Moderation() {
         dataSource={query.data?.items ?? []}
         locale={{ emptyText: '접수된 게시물 신고가 없습니다.' }}
         pagination={{
+          mode: 'server',
           current: search.page,
           pageSize: 20,
           total: query.data?.total ?? 0,

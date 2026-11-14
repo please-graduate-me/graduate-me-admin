@@ -98,6 +98,7 @@ export function ProcessingJobs({
           emptyText: <EmptyState title='기록된 처리 작업이 없습니다.' />,
         }}
         pagination={{
+          mode: 'server',
           current: search.page,
           pageSize: 20,
           total: query.data?.total ?? 0,

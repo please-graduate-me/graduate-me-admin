@@ -221,7 +221,11 @@ export function MaterialOcrPanel({
               rowKey={(_, index) => String(index)}
               size='small'
               dataSource={item.fields}
-              pagination={{ pageSize: 10, showSizeChanger: false }}
+              pagination={{
+                mode: 'client',
+                pageSize: 10,
+                showSizeChanger: false,
+              }}
               columns={[
                 { title: '인식한 원문', dataIndex: 'text', width: '52%' },
                 {

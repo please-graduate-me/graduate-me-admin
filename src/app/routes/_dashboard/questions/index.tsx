@@ -185,6 +185,7 @@ function Questions() {
           ),
         }}
         pagination={{
+          mode: 'server',
           current: search.page,
           pageSize: query.data?.limit ?? 20,
           total: query.data?.total ?? 0,

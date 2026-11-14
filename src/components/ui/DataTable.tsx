@@ -33,11 +33,10 @@ type Column<T> =
 type Paging = {
   current?: number;
   pageSize?: number;
-  total?: number;
   showSizeChanger?: boolean;
   hideOnSinglePage?: boolean;
   onChange?: (page: number) => void;
-};
+} & ({ mode: 'server'; total: number } | { mode: 'client'; total?: never });
 
 /** 운영 목록의 서버·로컬 페이지와 확장 오류 상세를 Astryx 표에 연결한다. */
 export function DataTable<T extends Record<string, unknown>>({
@@ -73,16 +72,23 @@ export function DataTable<T extends Record<string, unknown>>({
 }) {
   const [localPage, setLocalPage] = useState(1);
   const [expanded, setExpanded] = useState<Key[]>([]);
-  const page = pagination ? (pagination.current ?? localPage) : 1;
+  const requestedPage = pagination ? (pagination.current ?? localPage) : 1;
   const pageSize = pagination ? (pagination.pageSize ?? 20) : dataSource.length;
 
-  const total = pagination
-    ? (pagination.total ?? dataSource.length)
-    : dataSource.length;
+  const total =
+    pagination && pagination.mode === 'server'
+      ? pagination.total
+      : dataSource.length;
 
-  // 서버 집계가 있는 표는 이미 잘린 결과를 다시 자르지 않는다.
+  // 필터로 줄어든 로컬 목록이 이전 페이지 번호 때문에 비어 보이지 않게 한다.
+  const page =
+    pagination && pagination.mode === 'client'
+      ? Math.min(requestedPage, Math.max(1, Math.ceil(total / pageSize)))
+      : requestedPage;
+
+  // 서버에서 이미 잘린 결과를 클라이언트에서 다시 자르지 않는다.
   const rows =
-    pagination && pagination.total === undefined
+    pagination && pagination.mode === 'client'
       ? dataSource.slice((page - 1) * pageSize, page * pageSize)
       : dataSource;
 

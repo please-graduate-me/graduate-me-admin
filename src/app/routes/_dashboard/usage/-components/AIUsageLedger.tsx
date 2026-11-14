@@ -198,6 +198,7 @@ export function AIUsageLedger({
         dataSource={items}
         loading={query.isPending}
         pagination={{
+          mode: 'server',
           current: search.page,
           pageSize: 20,
           total: data?.total ?? 0,

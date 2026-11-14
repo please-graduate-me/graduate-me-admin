@@ -46,6 +46,7 @@ export function OverviewTasks({
         loading={loading}
         scroll={{ x: 800 }}
         pagination={{
+          mode: 'client',
           pageSize: 8,
           showSizeChanger: false,
           hideOnSinglePage: true,

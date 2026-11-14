@@ -64,6 +64,7 @@ function Events() {
           emptyText: <EmptyState title='조회할 검토 · 변경 이력이 없습니다.' />,
         }}
         pagination={{
+          mode: 'server',
           current: search.page,
           pageSize: 20,
           total: query.data?.total ?? 0,

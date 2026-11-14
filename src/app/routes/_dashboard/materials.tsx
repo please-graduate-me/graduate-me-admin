@@ -84,6 +84,7 @@ function Materials() {
           emptyText: <EmptyState title='등록된 자료가 없습니다.' />,
         }}
         pagination={{
+          mode: 'server',
           current: search.page,
           pageSize: 20,
           total: query.data?.total ?? 0,

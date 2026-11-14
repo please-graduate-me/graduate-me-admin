@@ -84,9 +84,9 @@ function Helpers() {
           emptyText: <EmptyState title='등록된 조교가 없습니다.' />,
         }}
         pagination={{
+          mode: 'client',
           current: tablePage(search.page, items.length),
           pageSize: 20,
-          total: items.length,
           showSizeChanger: false,
           onChange: (page) => change({ page }),
         }}
