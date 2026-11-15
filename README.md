@@ -73,3 +73,13 @@ docker compose down
 조교 자격은 운영 콘솔 접근이나 자료 수정 권한을 부여하지 않습니다. 게시글과 댓글의 조교 배지, 본인이 태그된 글 모아보기는 사용자 웹에서 제공합니다. 자료 등록·OCR은 `/api/admin/resources`의 전용 인증 경로를 사용하면서 기존 소유권·자료·AI 한도를 적용합니다.
 
 독립 관리자 호스트는 `ADMIN_BASE_PATH=/`, `VITE_STUDENT_URL=https://pleasegraduate.me`로 빌드합니다. `/api/`는 같은 출처의 백엔드로 프록시하며, 서버가 운영 세션과 변경 요청 출처를 검증합니다.
+
+## 앱별 CI/CD
+
+`.github/workflows/check.yaml`은 PR과 `main` push에서 포맷·린트·타입·테스트·빌드와 로컬 Compose 구성을 검사합니다. 검사가 통과한 `main`은 infra의 재사용 workflow를 호출해 이 저장소의 Dockerfile로 `linux/amd64` 이미지를 만듭니다. Tailscale·SSH로 홈서버에 직접 전송한 뒤 `admin`를 배포합니다. 이미지 저장소나 홈서버 빌드는 사용하지 않습니다.
+
+관리자 웹 배포는 자기 컨테이너만 교체하고 API·DB·다른 앱을 유지합니다.
+
+연결 설정 후 저장소 Variable `DEPLOY_ENABLED=true`일 때 자동 배포합니다. 최초 연결 전에는 검사는 실행하고 배포만 생략합니다. PR 코드는 홈서버에서 실행하지 않습니다. 수동 재배포는 GitHub Actions에서 `main`을 선택해 실행합니다. 새 merge가 이미 있으면 오래된 커밋의 배포는 생략합니다.
+
+Dockerfile은 이미지에 들어갈 환경·코드·기본 실행 명령을 관리하고, 로컬 Compose는 개발 실행을 담당합니다. 홈서버의 운영 환경변수·네트워크·이미지 버전·재시작 정책과 배포 절차는 [infra 운영 안내](https://github.com/please-graduate-me/graduate-me-infra#readme)를 따릅니다. infra의 새 설정은 수동으로 적용한 뒤에만 다음 앱 배포에서 사용합니다.
