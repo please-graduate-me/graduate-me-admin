@@ -1,21 +1,50 @@
-name: 관리자 앱 검사
+name: 관리자 웹 검사와 앱별 배포
 on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: admin-pipeline-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      - name: 검사할 코드 받기
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Node.js 준비
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: '22'
+      - name: 검증한 Docker Compose 설치
+        uses: docker/setup-compose-action@54042514f505b273907334ae2b9cdbb9a0213c1a
+        with:
+          version: v5.1.0
       - run: corepack enable && corepack prepare pnpm@10.33.0 --activate
       - run: pnpm install --frozen-lockfile
-      - run: pnpm check:ci
-      - run: pnpm test
-      - run: pnpm build
-      - run: docker compose -f compose.yaml -f compose.dev.yaml config --quiet
+      - name: 포맷·린트·타입 검사
+        run: pnpm check:ci
+      - name: 테스트
+        run: pnpm test
+      - name: 앱 빌드
+        run: pnpm build
+      - name: 로컬 Compose 구성 검사
+        run: docker compose -f compose.yaml -f compose.dev.yaml config --quiet
+  deploy:
+    name: 관리자 웹만 홈서버에 배포
+    needs: check
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.DEPLOY_ENABLED == 'true'
+    permissions:
+      contents: read
+      id-token: write
+    # 공통 배포 절차는 infra에 두고 각 앱이 자기 배포를 시작한다.
+    uses: please-graduate-me/graduate-me-infra/.github/workflows/deploy-app.yaml@main
+    with:
+      service: admin
+    secrets: inherit
