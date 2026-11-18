@@ -61,7 +61,7 @@ docker compose down
 
 운영 콘솔은 관리자 아이디와 비밀번호만 사용합니다. 일반 사용자, 조교, 수업 담당자는 `graduate-me-frontend`를 사용합니다. 조교는 개인 답변 작업자가 아니라 커뮤니티에서 타이틀을 가진 일반 사용자입니다.
 
-백엔드의 `ADMIN_LOGIN_ID`, `ADMIN_PASSWORD_HASH`, `ADMIN_URL`을 설정합니다. 해시는 백엔드의 `pnpm admin:password`로 생성하며, 실제 비밀번호와 해시는 브라우저 환경변수나 Git에 넣지 않습니다. 설정·세션 만료·로그인 시도 제한은 백엔드 README의 인증 안내를 따릅니다. Google OAuth 설정은 사용자 웹에만 필요합니다.
+백엔드의 `ADMIN_LOGIN_ID`, `ADMIN_PASSWORD_HASH`, `ADMIN_URL`을 설정합니다. 해시는 백엔드의 `pnpm admin:password`로 생성하며, 실제 비밀번호와 해시는 브라우저 환경변수나 Git에 넣지 않습니다. 설정·세션 만료·로그인 시도 제한은 백엔드 README의 인증 안내를 따릅니다. 사용자 웹은 학교 이메일 인증번호로 가입·로그인합니다.
 
 - `/login`: 운영 아이디·비밀번호 인증
 - `/`: 운영 현황
@@ -72,7 +72,7 @@ docker compose down
 
 조교 자격은 운영 콘솔 접근이나 자료 수정 권한을 부여하지 않습니다. 게시글과 댓글의 조교 배지, 본인이 태그된 글 모아보기는 사용자 웹에서 제공합니다. 자료 등록·OCR은 `/api/admin/resources`의 전용 인증 경로를 사용하면서 기존 소유권·자료·AI 한도를 적용합니다.
 
-독립 관리자 호스트는 `ADMIN_BASE_PATH=/`, `VITE_STUDENT_URL=https://pleasegraduate.me`로 빌드합니다. `/api/`는 같은 출처의 백엔드로 프록시하며, 서버가 운영 세션과 변경 요청 출처를 검증합니다.
+독립 관리자 호스트는 `ADMIN_BASE_PATH=/`, `VITE_STUDENT_URL=https://app.pleasegraduate.me`로 빌드합니다. `/api/`는 같은 출처의 백엔드로 프록시하며, 서버가 운영 세션과 변경 요청 출처를 검증합니다.
 
 ## 앱별 CI/CD
 
